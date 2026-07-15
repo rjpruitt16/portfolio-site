@@ -32,6 +32,11 @@ const videos = [
 
   <section class="wrap post-section">
     <p class="mono-tag">// guest post</p>
+    <p class="post-intro">
+      Wrote this for <a href="https://www.ezthrottle.network" target="_blank" rel="noopener" class="inline-link">EZThrottle</a>,
+      a multi-region HTTP proxy that races outbound API calls across regions — the way Cloudflare
+      routes inbound traffic, but for the requests your app makes to things like OpenAI and Stripe.
+    </p>
     <a href="https://www.ezthrottle.network/blog/making-failure-boring-again" target="_blank" rel="noopener" class="post-card">
       <div>
         <span class="post-source mono-tag">EZTHROTTLE.NETWORK</span>
@@ -80,6 +85,11 @@ const videos = [
   .inline-link { color: var(--signal-bright); border-bottom: 1px solid var(--signal); }
 
   .post-section { padding-bottom: 70px; }
+  .post-intro {
+    max-width: 62ch;
+    margin: 18px 0 0;
+    color: var(--paper-dim);
+  }
   .post-card {
     display: flex;
     justify-content: space-between;

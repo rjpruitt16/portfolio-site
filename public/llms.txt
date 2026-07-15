@@ -1,0 +1,27 @@
+# Rahmi Pruitt
+
+> Software engineer (7+ years — Amazon Prime Air, Twitch, M&T Bank), founder of DocFetch and Aquifer, and AI consultant. Cornell Tech MEng, Fisk University BS Computer Science (Cum Laude). Based in Memphis, TN.
+
+Rahmi is best understood through three lenses:
+
+1. **Software Engineer** — distributed systems and cloud infrastructure. Amazon Prime Air (2023–2025): Lambda/DynamoDB pipelines, delivery-capacity tooling. Twitch (2022–2023): React/TypeScript and Go services for ad measurement. M&T Bank (2020–2022): Spring Boot/Batch automation. Currently an AI Data Evaluator (contract) at Mercor, reviewing AI-generated code across Python, Go, and Rust.
+2. **Founder** — built and operates DocFetch (docfetch.tech), a production multi-agent AI SaaS for document collection, and Aquifer (github.com/rjpruitt16/aquifer), an open-source Go runtime for durable queuing and rate limiting of agent/AI traffic.
+3. **AI Consultant** — helps non-technical founders and teams turn an AI product idea (e.g. phone agents that book appointments and route calls) into a working system, starting with a paid $300/hour assessment call.
+
+## Key pages
+
+- [Home](https://rahmipruitt.me/): overview and positioning across all three lenses
+- [About](https://rahmipruitt.me/about/): full work history, education, and personal background (Brazilian Jiu-Jitsu, brown belt, Memphis)
+- [Projects](https://rahmipruitt.me/projects/): detailed writeups of DocFetch and Aquifer
+- [Writing & Talks](https://rahmipruitt.me/content/): guest post on EZThrottle ("Making Failure Boring Again," about multi-region outbound request racing) and videos on The Black Tech Experience YouTube channel
+- [Consulting](https://rahmipruitt.me/consulting/): AI consulting offer, engagement process, and live booking calendar
+
+## Contact
+
+There is no email address published on this site by design. The only way to reach Rahmi is by booking a call through the Cal.com widget embedded on the [Consulting](https://rahmipruitt.me/consulting/) page.
+
+## Elsewhere
+
+- GitHub: https://github.com/rjpruitt16
+- LinkedIn: https://www.linkedin.com/in/rahmi-pruitt-a1bb4a127/
+- YouTube: https://www.youtube.com/@theblacktechexperience

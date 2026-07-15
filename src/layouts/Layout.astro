@@ -21,6 +21,34 @@ const { title, description } = Astro.props;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://rahmipruitt.me/images/headshot-business.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary" />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: 'Rahmi Pruitt',
+      url: 'https://rahmipruitt.me',
+      image: 'https://rahmipruitt.me/images/headshot-business.jpg',
+      jobTitle: 'Software Engineer & AI Consultant',
+      alumniOf: [
+        { '@type': 'CollegeOrUniversity', name: 'Cornell Tech' },
+        { '@type': 'CollegeOrUniversity', name: 'Fisk University' },
+      ],
+      sameAs: [
+        'https://github.com/rjpruitt16',
+        'https://www.linkedin.com/in/rahmi-pruitt-a1bb4a127/',
+        'https://www.youtube.com/@theblacktechexperience',
+      ],
+      knowsAbout: [
+        'Distributed Systems',
+        'AI Agent Infrastructure',
+        'Cloud Infrastructure',
+        'Go',
+        'Python',
+        'TypeScript',
+      ],
+    })} />
   </head>
   <body>
     <Nav />
