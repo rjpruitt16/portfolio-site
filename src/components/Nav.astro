@@ -1,0 +1,97 @@
+---
+const path = Astro.url.pathname;
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/about/', label: 'About' },
+  { href: '/projects/', label: 'Projects' },
+  { href: '/content/', label: 'Writing & Talks' },
+];
+---
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a href="/" class="brand">
+      <span class="brand-mark">RP</span>
+      <span class="brand-name">Rahmi Pruitt</span>
+    </a>
+    <nav class="links">
+      {links.map((l) => (
+        <a href={l.href} class:list={['link', { active: path === l.href }]}>{l.label}</a>
+      ))}
+      <a href="/consulting/" class="cta">Work with me</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(20, 18, 15, 0.86);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 76px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-mark {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--ink);
+    background: var(--signal-bright);
+    padding: 4px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--paper);
+  }
+  .links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .link {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--paper-faint);
+    transition: color 0.2s ease;
+  }
+  .link:hover, .link.active {
+    color: var(--paper);
+  }
+  .cta {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--signal-bright);
+    padding: 9px 16px;
+    border-radius: 3px;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  .cta:hover {
+    background: var(--paper);
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 720px) {
+    .links { gap: 14px; }
+    .link { display: none; }
+    .nav-inner { height: 64px; }
+  }
+</style>

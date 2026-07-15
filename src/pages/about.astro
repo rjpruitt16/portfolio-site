@@ -1,0 +1,181 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const experience = [
+  {
+    range: '2025 — Present',
+    org: 'Mercor',
+    role: 'AI Data Evaluator (Contract)',
+    notes: 'Reviewing AI-generated code and reasoning across Python, Go, and Rust — ranking, red-teaming, and hallucination detection for coding models.',
+  },
+  {
+    range: '2023 — 2025',
+    org: 'Amazon Prime Air',
+    role: 'Software Engineer',
+    notes: 'Lambda/DynamoDB pipelines to catch drone deliveries at risk of missing promise times. Internal APIs for secure coordinate retrieval. React tooling for delivery capacity management.',
+  },
+  {
+    range: '2022 — 2023',
+    org: 'Twitch',
+    role: 'Software Engineer',
+    notes: 'React/TypeScript features and Go backend services for ad measurement. Airflow monitoring and infra tooling across Kinesis, Lambda, and CloudWatch.',
+  },
+  {
+    range: '2020 — 2022',
+    org: 'M&T Bank',
+    role: 'Software Engineer',
+    notes: 'Spring Boot automation for SQL backup workflows across providers. Spring Batch processing systems and scheduled enterprise automation.',
+  },
+  {
+    range: '2018 — 2019',
+    org: 'Atos Syntel / American Express',
+    role: 'Backend Java Developer',
+    notes: 'Enterprise Java applications with Spring, JDBC, and SQL — automated testing across backend services.',
+  },
+];
+
+const education = [
+  { org: 'Cornell Tech', degree: 'Master of Engineering, Computer Science' },
+  { org: 'Fisk University', degree: 'Bachelor of Science, Computer Science — Cum Laude' },
+];
+---
+<Layout
+  title="About — Rahmi Pruitt"
+  description="7+ years building distributed systems and cloud infrastructure at Amazon Prime Air, Twitch, and M&T Bank. Cornell Tech MEng, Fisk University BS."
+>
+  <section class="wrap about-hero">
+    <p class="mono-tag">// about</p>
+    <h1>Engineer first. Builder, always.</h1>
+    <p class="about-lede">
+      I've spent 7+ years in production systems — coordinating drone deliveries at Amazon,
+      measuring ads at Twitch scale, automating backend workflows at a bank. Somewhere in there
+      I started building my own products instead of just fixing other people's queues, and I
+      haven't really stopped since.
+    </p>
+  </section>
+
+  <section class="wrap timeline-section">
+    <p class="mono-tag">// experience</p>
+    <ol class="timeline">
+      {experience.map((e) => (
+        <li class="tl-row">
+          <span class="tl-range mono-tag">{e.range}</span>
+          <div class="tl-body">
+            <h3>{e.org} <span class="tl-role">— {e.role}</span></h3>
+            <p>{e.notes}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="wrap education-section">
+    <p class="mono-tag">// education</p>
+    <div class="edu-grid">
+      {education.map((ed) => (
+        <div class="edu-card">
+          <h3>{ed.org}</h3>
+          <p>{ed.degree}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap offclock-section">
+    <p class="mono-tag">// off the clock</p>
+    <h2>Outside of a terminal</h2>
+    <p class="offclock-lede">
+      Brazilian Jiu-Jitsu, mostly — currently a brown belt, training out of Memphis. It's the same
+      discipline as debugging distributed systems: stay calm when it's not working, and don't
+      mistake motion for progress.
+    </p>
+    <div class="offclock-grid">
+      <img src="/images/personality-bjj.jpg" alt="Rahmi at Brazilian Jiu-Jitsu training in Memphis" />
+      <img src="/images/personality-rooftop-1.jpg" alt="Rahmi on a rooftop" class="tall" />
+      <img src="/images/personality-rooftop-2.jpg" alt="Rahmi on a rooftop, wide shot" />
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .about-hero {
+    padding-top: 64px;
+    padding-bottom: 72px;
+    max-width: 900px;
+  }
+  .about-hero h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.1rem);
+    margin: 14px 0 22px;
+  }
+  .about-lede {
+    font-size: 1.1rem;
+    max-width: 62ch;
+  }
+
+  .timeline-section { padding-bottom: 80px; }
+  .timeline {
+    list-style: none;
+    margin: 24px 0 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .tl-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 32px;
+    padding: 26px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .tl-range { padding-top: 4px; color: var(--paper-faint); }
+  .tl-body h3 {
+    font-size: 1.2rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .tl-role {
+    font-weight: 400;
+    color: var(--paper-faint);
+  }
+  .tl-body p { margin: 0; max-width: 62ch; }
+
+  .education-section { padding-bottom: 80px; }
+  .edu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  .edu-card {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 22px 24px;
+    background: var(--ink-raised);
+  }
+  .edu-card h3 { font-size: 1.1rem; margin-bottom: 6px; }
+  .edu-card p { margin: 0; color: var(--paper-faint); font-size: 0.92rem; }
+
+  .offclock-section { padding-bottom: 110px; }
+  .offclock-section h2 { font-size: 1.8rem; margin: 10px 0 14px; }
+  .offclock-lede { max-width: 60ch; margin-bottom: 28px; }
+  .offclock-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  .offclock-grid img {
+    width: 100%;
+    height: 340px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--rule);
+    filter: sepia(8%) saturate(90%);
+  }
+
+  @media (max-width: 800px) {
+    .tl-row { grid-template-columns: 1fr; gap: 6px; }
+    .edu-grid { grid-template-columns: 1fr; }
+    .offclock-grid { grid-template-columns: 1fr; }
+    .offclock-grid img { height: 280px; }
+  }
+</style>

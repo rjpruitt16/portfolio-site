@@ -1,0 +1,151 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const videos = [
+  {
+    id: 'eCZOKQPnvV0',
+    tag: 'TUTORIAL // MAKE.COM',
+    title: '5 Minutes of Make: Auto-Notify Subscribers',
+    copy: 'Part of an ongoing series breaking down no-code/low-code automation builds in under five minutes — for The Black Tech Experience.',
+  },
+  {
+    id: 'UlPAHqPJi2Y',
+    tag: 'AD // DOCFETCH',
+    title: 'DocFetch CPA Ad',
+    copy: 'Wrote, shot, and edited a direct-response ad for DocFetch aimed at accountants and bookkeepers chasing client paperwork.',
+  },
+];
+---
+<Layout
+  title="Writing & Talks — Rahmi Pruitt"
+  description="Blog posts and videos on AI agent reliability, infrastructure, and building in public — including a guest post for EZThrottle and The Black Tech Experience YouTube channel."
+>
+  <section class="wrap content-hero">
+    <p class="mono-tag">// writing & talks</p>
+    <h1>Explaining the unglamorous parts out loud</h1>
+    <p class="content-lede">
+      I write and record about the parts of building AI systems that don't make it into the demo —
+      retries, rate limits, and what "it works on my machine" turns into at production traffic. I
+      also make it for whoever's paying attention on <a href="https://www.youtube.com/@theblacktechexperience" target="_blank" rel="noopener" class="inline-link">The Black Tech Experience</a>.
+    </p>
+  </section>
+
+  <section class="wrap post-section">
+    <p class="mono-tag">// guest post</p>
+    <a href="https://www.ezthrottle.network/blog/making-failure-boring-again" target="_blank" rel="noopener" class="post-card">
+      <div>
+        <span class="post-source mono-tag">EZTHROTTLE.NETWORK</span>
+        <h2>Making Failure Boring Again</h2>
+        <p>
+          Why client-side retries fall apart during a partial regional outage, and how region-racing
+          outbound requests across providers — the way Cloudflare routes inbound traffic — turns a
+          3am page into a non-event. Includes the real math on what a DIY retry queue costs once it
+          needs its own team.
+        </p>
+      </div>
+      <span class="post-arrow">Read the post &rarr;</span>
+    </a>
+  </section>
+
+  <section class="wrap video-section">
+    <p class="mono-tag">// on video</p>
+    <div class="video-grid">
+      {videos.map((v) => (
+        <div class="video-card">
+          <div class="video-frame">
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${v.id}`}
+              title={v.title}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <span class="mono-tag video-tag">{v.tag}</span>
+          <h3>{v.title}</h3>
+          <p>{v.copy}</p>
+        </div>
+      ))}
+    </div>
+    <a href="https://www.youtube.com/@theblacktechexperience" target="_blank" rel="noopener" class="btn-ghost">
+      More on the channel &rarr;
+    </a>
+  </section>
+</Layout>
+
+<style>
+  .content-hero { padding: 64px 0 60px; max-width: 800px; }
+  .content-hero h1 { font-size: clamp(2.2rem, 4.5vw, 3rem); margin: 14px 0 20px; }
+  .content-lede { font-size: 1.08rem; max-width: 62ch; }
+  .inline-link { color: var(--signal-bright); border-bottom: 1px solid var(--signal); }
+
+  .post-section { padding-bottom: 70px; }
+  .post-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    padding: 34px;
+    margin-top: 20px;
+    background: var(--ink-raised);
+    transition: border-color 0.2s ease;
+    flex-wrap: wrap;
+  }
+  .post-card:hover { border-color: var(--signal); }
+  .post-source { display: block; margin-bottom: 10px; }
+  .post-card h2 { font-size: 1.6rem; margin-bottom: 12px; }
+  .post-card p { max-width: 60ch; margin: 0; }
+  .post-arrow {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--signal-bright);
+    white-space: nowrap;
+  }
+
+  .video-section { padding-bottom: 100px; }
+  .video-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin: 20px 0 32px;
+  }
+  .video-frame {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    background: #000;
+  }
+  .video-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .video-tag { display: block; margin: 16px 0 8px; }
+  .video-card h3 { font-size: 1.15rem; margin-bottom: 8px; }
+  .video-card p { font-size: 0.92rem; margin: 0; }
+
+  .btn-ghost {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: 1px solid var(--rule);
+    color: var(--paper);
+    padding: 13px 22px;
+    border-radius: 3px;
+    transition: border-color 0.2s ease;
+  }
+  .btn-ghost:hover { border-color: var(--signal-bright); }
+
+  @media (max-width: 800px) {
+    .video-grid { grid-template-columns: 1fr; }
+    .post-card { flex-direction: column; align-items: flex-start; }
+  }
+</style>

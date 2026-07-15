@@ -1,0 +1,56 @@
+---
+interface Props {
+  index: string;
+  title: string;
+  copy: string;
+  href: string;
+}
+const { index, title, copy, href } = Astro.props;
+---
+<a href={href} class="role">
+  <span class="role-index mono-tag">ROLE_{index}</span>
+  <h3 class="role-title">{title}</h3>
+  <p class="role-copy">{copy}</p>
+  <span class="role-arrow">&rarr;</span>
+</a>
+
+<style>
+  .role {
+    display: block;
+    position: relative;
+    border: 1px solid var(--rule);
+    background: var(--ink-raised);
+    padding: 28px 26px 32px;
+    border-radius: 4px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .role:hover {
+    border-color: var(--signal);
+    transform: translateY(-3px);
+  }
+  .role:hover .role-arrow {
+    transform: translate(3px, -3px);
+    color: var(--signal-bright);
+  }
+  .role-index {
+    display: block;
+    margin-bottom: 14px;
+  }
+  .role-title {
+    font-size: 1.35rem;
+    margin-bottom: 10px;
+  }
+  .role-copy {
+    font-size: 0.92rem;
+    margin: 0;
+    color: var(--paper-faint);
+  }
+  .role-arrow {
+    position: absolute;
+    top: 26px;
+    right: 24px;
+    font-family: var(--font-mono);
+    color: var(--paper-faint);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+</style>

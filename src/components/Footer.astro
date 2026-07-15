@@ -1,0 +1,51 @@
+---
+const year = new Date().getFullYear();
+---
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <div>
+      <p class="mono-tag">// end of file</p>
+      <p class="foot-copy">© {year} Rahmi Pruitt. Built with Astro, deployed on GitHub Pages.</p>
+    </div>
+    <div class="foot-links">
+      <a href="https://github.com/rjpruitt16" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.youtube.com/@theblacktechexperience" target="_blank" rel="noopener">YouTube</a>
+      <a href="/consulting/">Book a call</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    border-top: 1px solid var(--rule);
+    padding: 40px 0 48px;
+    margin-top: 100px;
+  }
+  .foot-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .foot-copy {
+    font-size: 0.85rem;
+    color: var(--paper-faint);
+    margin: 6px 0 0;
+  }
+  .foot-links {
+    display: flex;
+    gap: 22px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .foot-links a {
+    color: var(--paper-dim);
+    transition: color 0.2s ease;
+  }
+  .foot-links a:hover {
+    color: var(--signal-bright);
+  }
+</style>

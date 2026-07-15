@@ -1,0 +1,88 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+---
+<Layout
+  title="Projects — Rahmi Pruitt"
+  description="DocFetch, a production multi-agent AI SaaS, and Aquifer, an open-source Go runtime for agent traffic and reliability."
+>
+  <section class="wrap proj-hero">
+    <p class="mono-tag">// projects</p>
+    <h1>Things I've shipped, end to end</h1>
+    <p class="proj-lede">
+      Not case studies of work I helped with — products I designed, built, deployed, and pay the
+      hosting bill for.
+    </p>
+  </section>
+
+  <section class="wrap proj-detail">
+    <ProjectCard
+      tag="PRODUCT // LIVE"
+      name="DocFetch"
+      pitch="An AI document collection platform. You tell it what you need and who has it — it drafts the outreach, tracks what's missing, sends reminders, and delivers an organized packet."
+      bullets={[
+        'Planner, collector, and isolated classifier agents with bounded execution loops and restricted tool access — designed to reduce prompt-injection risk',
+        'Persistent workflow orchestration via PostgreSQL state transitions, driven by AgentMail webhooks — no polling',
+        'Stripe Checkout, subscription billing, waitlists, authentication, and privacy-first automatic document deletion',
+        'Built for loan officers, bookkeepers, closing teams, and property managers chasing paperwork by hand',
+      ]}
+      stack="Python · FastHTML · Anthropic · Supabase / PostgreSQL · AgentMail · Stripe · Fly.io"
+      links={[{ label: 'docfetch.tech', href: 'https://docfetch.tech' }]}
+      accent="signal"
+    />
+  </section>
+
+  <section class="wrap proj-detail">
+    <ProjectCard
+      tag="OPEN SOURCE // MIT LICENSE"
+      name="Aquifer"
+      pitch="A self-hosted Go runtime built for the moment an agent workload stops being a toy: durable queuing, controlled dispatch, and backpressure so a traffic spike doesn't take down the backend it's calling."
+      bullets={[
+        'Durable job queue with SQLite persistence and crash recovery — no external database required',
+        'Per-upstream rate limiting and dynamic pacing driven by the upstream’s own response headers',
+        'HTTP API and MCP stdio adapters, so it drops into existing agent/tool-calling stacks',
+        'L8 protocol for trustless webhook delivery using public-key crypto instead of shared secrets',
+      ]}
+      stack="Go · SQLite · MCP · Server-Sent Events"
+      links={[{ label: 'GitHub — rjpruitt16/aquifer', href: 'https://github.com/rjpruitt16/aquifer' }]}
+      accent="moss"
+    />
+  </section>
+
+  <section class="wrap proj-cta">
+    <p class="mono-tag">// building something similar?</p>
+    <h2>If you're picturing your own version of this</h2>
+    <p class="proj-cta-copy">
+      Most of what's above started as someone describing a problem out loud. If you've got an AI
+      product idea and need someone who can both design it and actually build it, that's the
+      conversation I have on the consulting page.
+    </p>
+    <a href="/consulting/" class="btn-primary">Work with me &rarr;</a>
+  </section>
+</Layout>
+
+<style>
+  .proj-hero { padding: 64px 0 60px; max-width: 800px; }
+  .proj-hero h1 { font-size: clamp(2.2rem, 4.5vw, 3rem); margin: 14px 0 20px; }
+  .proj-lede { font-size: 1.08rem; max-width: 58ch; }
+  .proj-detail { padding-bottom: 40px; }
+  .proj-cta {
+    padding: 60px 0 120px;
+    max-width: 700px;
+  }
+  .proj-cta h2 { font-size: 1.9rem; margin: 10px 0 16px; }
+  .proj-cta-copy { max-width: 56ch; margin-bottom: 24px; }
+  .btn-primary {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: var(--signal-bright);
+    color: var(--ink);
+    padding: 14px 24px;
+    border-radius: 3px;
+    transition: transform 0.15s ease;
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+</style>

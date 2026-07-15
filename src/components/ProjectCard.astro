@@ -1,0 +1,98 @@
+---
+interface Props {
+  tag: string;
+  name: string;
+  pitch: string;
+  bullets: string[];
+  stack: string;
+  links: { label: string; href: string }[];
+  accent?: 'signal' | 'moss';
+}
+const { tag, name, pitch, bullets, stack, links, accent = 'signal' } = Astro.props;
+---
+<article class:list={['card', accent]}>
+  <div class="card-top">
+    <span class="mono-tag">{tag}</span>
+    <h3 class="card-name">{name}</h3>
+    <p class="card-pitch">{pitch}</p>
+  </div>
+  <ul class="card-bullets">
+    {bullets.map((b) => <li>{b}</li>)}
+  </ul>
+  <div class="card-bottom">
+    <span class="card-stack">{stack}</span>
+    <div class="card-links">
+      {links.map((l) => (
+        <a href={l.href} target="_blank" rel="noopener" class="card-link">{l.label} ↗</a>
+      ))}
+    </div>
+  </div>
+</article>
+
+<style>
+  .card {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 30px;
+    background: linear-gradient(180deg, var(--ink-raised), var(--ink) 140%);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--signal);
+  }
+  .card.moss::before {
+    background: var(--moss);
+  }
+  .card-name {
+    font-size: 1.6rem;
+    margin: 10px 0 8px;
+  }
+  .card-pitch {
+    color: var(--paper-dim);
+    margin: 0;
+  }
+  .card-bullets {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--paper-faint);
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .card-bullets li::marker {
+    color: var(--signal);
+  }
+  .card.moss .card-bullets li::marker {
+    color: var(--moss);
+  }
+  .card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--rule);
+    padding-top: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .card-stack {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--paper-faint);
+  }
+  .card-links {
+    display: flex;
+    gap: 16px;
+  }
+  .card-link {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--signal-bright);
+  }
+</style>

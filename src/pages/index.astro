@@ -1,0 +1,275 @@
+---
+import Layout from '../layouts/Layout.astro';
+import RoleTag from '../components/RoleTag.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+---
+<Layout
+  title="Rahmi Pruitt — Software Engineer, Founder, AI Consultant"
+  description="Software engineer turned AI consultant. I design and build agent infrastructure, custom AI products, and the systems that keep them reliable."
+>
+  <section class="hero wrap">
+    <div class="hero-text">
+      <p class="mono-tag reveal" style="animation-delay: 0s">LOG_ENTRY // MEMPHIS, TN</p>
+      <h1 class="hero-title reveal" style="animation-delay: 0.08s">
+        I build the systems<br />underneath AI —<br /><em>then the agent on top.</em>
+      </h1>
+      <p class="hero-sub reveal" style="animation-delay: 0.18s">
+        7+ years shipping production software at Amazon Prime Air, Twitch, and M&amp;T Bank.
+        Now building AI agent infrastructure and custom AI products for teams who'd rather
+        ship than firefight.
+      </p>
+      <div class="hero-actions reveal" style="animation-delay: 0.26s">
+        <a href="/consulting/" class="btn-primary">Work with me</a>
+        <a href="/projects/" class="btn-ghost">See what I've built</a>
+      </div>
+    </div>
+    <div class="hero-image reveal" style="animation-delay: 0.14s">
+      <img src="/images/headshot-business.jpg" alt="Rahmi Pruitt" />
+      <span class="hero-frame-tag mono-tag">FIG. 01 — R.PRUITT</span>
+    </div>
+  </section>
+
+  <section class="wrap roles">
+    <RoleTag
+      index="01"
+      title="Software Engineer"
+      copy="Distributed systems and cloud infra at Amazon Prime Air, Twitch, and M&T Bank. Go, Python, TypeScript, AWS."
+      href="/about/"
+    />
+    <RoleTag
+      index="02"
+      title="Founder"
+      copy="Built and shipped DocFetch, a production multi-agent AI SaaS, and Aquifer, an open-source agent runtime."
+      href="/projects/"
+    />
+    <RoleTag
+      index="03"
+      title="AI Consultant"
+      copy="I help non-technical founders and teams turn an idea for an AI product into a working system — and a real quote."
+      href="/consulting/"
+    />
+  </section>
+
+  <section class="wrap section-block">
+    <div class="section-head">
+      <p class="mono-tag">// featured work</p>
+      <h2>Two ways I've shipped this myself</h2>
+    </div>
+    <div class="project-grid">
+      <ProjectCard
+        tag="PRODUCT // LIVE"
+        name="DocFetch"
+        pitch="AI document collection platform. Tell it what you need and who has it — it handles outreach, reminders, and delivery."
+        bullets={[
+          'Planner, collector, and isolated classifier agents with bounded execution loops',
+          'Persistent workflow orchestration via AgentMail webhooks + Postgres state machine',
+          'Stripe billing, waitlists, auth, and privacy-first automatic document deletion',
+        ]}
+        stack="Python · FastHTML · Anthropic · Supabase · Stripe · Fly.io"
+        links={[{ label: 'docfetch.tech', href: 'https://docfetch.tech' }]}
+        accent="signal"
+      />
+      <ProjectCard
+        tag="OPEN SOURCE // MIT"
+        name="Aquifer"
+        pitch="A self-hosted Go runtime that queues requests durably, controls dispatch rate, and protects backends from agent traffic spikes."
+        bullets={[
+          'Durable job queue with SQLite persistence and crash recovery',
+          'Per-upstream rate limiting, backpressure, and fairness primitives',
+          'HTTP + MCP adapters for coordinating agentic and tool-calling workloads',
+        ]}
+        stack="Go · SQLite · MCP · Server-Sent Events"
+        links={[{ label: 'GitHub', href: 'https://github.com/rjpruitt16/aquifer' }]}
+        accent="moss"
+      />
+    </div>
+  </section>
+
+  <section class="wrap section-block">
+    <div class="section-head">
+      <p class="mono-tag">// on the record</p>
+      <h2>Writing and talks on agent reliability</h2>
+    </div>
+    <p class="section-lede">
+      I write and record about the unglamorous parts of AI infrastructure — retries, rate limits,
+      and what happens when a "simple" agent hits production traffic.
+    </p>
+    <a href="/content/" class="btn-ghost">Read &amp; watch &rarr;</a>
+  </section>
+
+  <section class="wrap consulting-band">
+    <div class="band-inner">
+      <div>
+        <p class="mono-tag band-tag">// open for engagements</p>
+        <h2 class="band-title">Have an AI product idea<br />that needs an engineer?</h2>
+        <p class="band-sub">
+          Phone agents that book appointments, answer questions, and route calls. Internal tools.
+          Software your team can hand off and keep building on. I'll assess it in one call, then
+          give you a real quote.
+        </p>
+      </div>
+      <a href="/consulting/" class="btn-band">Book a $300 assessment call &rarr;</a>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 60px;
+    align-items: center;
+    padding-top: 72px;
+    padding-bottom: 96px;
+  }
+  .hero-title {
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    margin: 18px 0 24px;
+    color: var(--paper);
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--signal-bright);
+  }
+  .hero-sub {
+    font-size: 1.08rem;
+    max-width: 46ch;
+    color: var(--paper-dim);
+  }
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .hero-image {
+    position: relative;
+    justify-self: end;
+  }
+  .hero-image img {
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: 4px;
+    filter: sepia(12%) saturate(85%) contrast(105%);
+    border: 1px solid var(--rule);
+  }
+  .hero-frame-tag {
+    position: absolute;
+    bottom: -14px;
+    left: 14px;
+    background: var(--ink);
+    padding: 5px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+  }
+
+  .btn-primary {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: var(--signal-bright);
+    color: var(--ink);
+    padding: 14px 24px;
+    border-radius: 3px;
+    transition: transform 0.15s ease;
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-ghost {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: 1px solid var(--rule);
+    color: var(--paper);
+    padding: 13px 22px;
+    border-radius: 3px;
+    transition: border-color 0.2s ease;
+  }
+  .btn-ghost:hover { border-color: var(--signal-bright); }
+
+  .roles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding-bottom: 110px;
+  }
+
+  .section-block {
+    padding-bottom: 110px;
+  }
+  .section-head { margin-bottom: 36px; }
+  .section-head h2 {
+    font-size: 2rem;
+    margin-top: 12px;
+  }
+  .section-lede {
+    max-width: 60ch;
+    font-size: 1.05rem;
+    margin-bottom: 24px;
+  }
+  .project-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .consulting-band {
+    padding-bottom: 120px;
+  }
+  .band-inner {
+    background: var(--signal);
+    border-radius: 6px;
+    padding: 56px;
+    display: grid;
+    grid-template-columns: 1.4fr 0.8fr;
+    gap: 40px;
+    align-items: center;
+  }
+  .band-tag { color: var(--ink); opacity: 0.7; }
+  .band-title {
+    color: var(--ink);
+    font-size: clamp(1.8rem, 3.4vw, 2.5rem);
+    margin: 10px 0 16px;
+  }
+  .band-sub {
+    color: var(--ink);
+    opacity: 0.85;
+    max-width: 48ch;
+    margin: 0;
+  }
+  .btn-band {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 18px 26px;
+    border-radius: 4px;
+    text-align: center;
+    justify-self: start;
+    transition: transform 0.15s ease;
+  }
+  .btn-band:hover { transform: translateY(-2px); }
+
+  .reveal {
+    opacity: 0;
+    animation: rise 0.7s ease forwards;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding-top: 48px; }
+    .hero-image { justify-self: start; }
+    .roles { grid-template-columns: 1fr; }
+    .project-grid { grid-template-columns: 1fr; }
+    .band-inner { grid-template-columns: 1fr; padding: 36px 24px; }
+    .btn-band { justify-self: stretch; text-align: center; }
+  }
+</style>
