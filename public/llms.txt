@@ -5,14 +5,14 @@
 Rahmi is best understood through three lenses:
 
 1. **Software Engineer** — distributed systems and cloud infrastructure. Amazon Prime Air (2023–2025): Lambda/DynamoDB pipelines, delivery-capacity tooling. Twitch (2022–2023): React/TypeScript and Go services for ad measurement. M&T Bank (2020–2022): Spring Boot/Batch automation. Currently an AI Data Evaluator (contract) at Mercor, reviewing AI-generated code across Python, Go, and Rust.
-2. **Founder** — built and operates DocFetch (docfetch.tech), a production multi-agent AI SaaS for document collection, and Aquifer (github.com/rjpruitt16/aquifer), an open-source Go runtime for durable queuing and rate limiting of agent/AI traffic.
+2. **Founder** — built and operates DocFetch (docfetch.tech), a production multi-agent AI SaaS for document collection; Aquifer (github.com/rjpruitt16/aquifer), an open-source Go runtime for durable queuing and rate limiting of agent/AI traffic; and EZThrottle Local (github.com/rjpruitt16/ezthrottle-local), the same fair-queuing idea rebuilt on the BEAM in Elixir with real-time SSE streaming and per-tenant isolation.
 3. **AI Consultant** — helps non-technical founders and teams turn an AI product idea (e.g. phone agents that book appointments and route calls) into a working system, starting with a paid $300/hour assessment call.
 
 ## Key pages
 
 - [Home](https://rahmipruitt.me/): overview and positioning across all three lenses
 - [About](https://rahmipruitt.me/about/): full work history, education, and personal background (Brazilian Jiu-Jitsu, brown belt, Memphis)
-- [Projects](https://rahmipruitt.me/projects/): detailed writeups of DocFetch and Aquifer
+- [Projects](https://rahmipruitt.me/projects/): detailed writeups of DocFetch, Aquifer, and EZThrottle Local
 - [Writing & Talks](https://rahmipruitt.me/content/): guest post on EZThrottle ("Making Failure Boring Again," about multi-region outbound request racing) and videos on The Black Tech Experience YouTube channel
 - [Consulting](https://rahmipruitt.me/consulting/): AI consulting offer, engagement process, and live booking calendar
 

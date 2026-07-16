@@ -4,7 +4,7 @@ import ProjectCard from '../components/ProjectCard.astro';
 ---
 <Layout
   title="Projects — Rahmi Pruitt"
-  description="DocFetch, a production multi-agent AI SaaS, and Aquifer, an open-source Go runtime for agent traffic and reliability."
+  description="DocFetch, a production multi-agent AI SaaS; Aquifer, an open-source Go runtime for agent traffic; and EZThrottle Local, its Elixir/BEAM counterpart."
 >
   <section class="wrap proj-hero">
     <p class="mono-tag">// projects</p>
@@ -45,6 +45,23 @@ import ProjectCard from '../components/ProjectCard.astro';
       ]}
       stack="Go · SQLite · MCP · Server-Sent Events"
       links={[{ label: 'GitHub — rjpruitt16/aquifer', href: 'https://github.com/rjpruitt16/aquifer' }]}
+      accent="moss"
+    />
+  </section>
+
+  <section class="wrap proj-detail">
+    <ProjectCard
+      tag="OPEN SOURCE // MIT LICENSE"
+      name="EZThrottle Local"
+      pitch="The same problem Aquifer solves — durable, fair queuing for spiky agentic traffic — rebuilt from scratch on the BEAM in Elixir, with real-time streaming and per-tenant fairness built in from day one."
+      bullets={[
+        'Per-tenant queue isolation (AccountQueue mode) so one account’s traffic can’t starve another’s',
+        'Live job progress over SSE, with automatic webhook fallback if a client’s stream drops',
+        'L8 protocol: Ed25519-signed webhooks instead of shared secrets — nothing to rotate or leak',
+        'Hot code reloading on the BEAM — ship an update without restarting or losing the in-memory queue',
+      ]}
+      stack="Elixir · OTP / BEAM · Ed25519 · Docker · Fly.io"
+      links={[{ label: 'GitHub — rjpruitt16/ezthrottle-local', href: 'https://github.com/rjpruitt16/ezthrottle-local' }]}
       accent="moss"
     />
   </section>
