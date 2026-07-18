@@ -144,21 +144,32 @@ const steps = [
   })(window as any, 'https://app.cal.com/embed/embed.js', 'init');
 
   // @ts-ignore
-  Cal('init', { origin: 'https://cal.com' });
+  Cal('init', 'advice', { origin: 'https://cal.com' });
   // @ts-ignore
-  Cal('inline', {
+  Cal('init', 'assessment', { origin: 'https://cal.com' });
+
+  // @ts-ignore
+  Cal.ns.advice('inline', {
     elementOrSelector: '#my-cal-inline-advice',
     calLink: 'rahmi-pruitt-bkdztz/advice',
     config: { layout: 'month_view' },
   });
   // @ts-ignore
-  Cal('inline', {
+  Cal.ns.assessment('inline', {
     elementOrSelector: '#my-cal-inline',
     calLink: 'rahmi-pruitt-bkdztz/business',
     config: { layout: 'month_view' },
   });
+
   // @ts-ignore
-  Cal('ui', {
+  Cal.ns.advice('ui', {
+    theme: 'dark',
+    styles: { branding: { brandColor: '#e8622b' } },
+    hideEventTypeDetails: false,
+    layout: 'month_view',
+  });
+  // @ts-ignore
+  Cal.ns.assessment('ui', {
     theme: 'dark',
     styles: { branding: { brandColor: '#e8622b' } },
     hideEventTypeDetails: false,
