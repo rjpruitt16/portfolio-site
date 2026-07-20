@@ -39,7 +39,7 @@ const steps = [
 ---
 <Layout
   title="Consulting — Rahmi Pruitt"
-  description="AI consulting for founders and teams: custom phone agents, internal AI tools, and system design. Book a $100 quick advice call or a $300 assessment call."
+  description="AI consulting for founders and teams: custom phone agents, internal AI tools, system design, and agent traffic reliability reviews. Book a $100 advice call, $300 assessment, or $400 traffic review."
 >
   <section class="wrap con-hero">
     <p class="mono-tag">// ai consultant</p>
@@ -111,6 +111,19 @@ const steps = [
     </p>
     <div class="cal-embed" id="my-cal-inline"></div>
   </section>
+
+  <section class="wrap traffic-section">
+    <p class="mono-tag">// running agents in production?</p>
+    <h2>Agent traffic reliability review — $400, one hour</h2>
+    <p class="book-lede">
+      For teams already running agents, MCP servers, or high-volume API workflows. We review your
+      retry behavior, rate limits, concurrency, and queueing — you leave with a diagnosis of your
+      highest-priority risks, a mitigation plan, and whether <a href="/projects/#aquifer" class="inline-link">Aquifer</a>
+      fits your system. If you move forward with implementation, the review fee is credited toward
+      the project.
+    </p>
+    <div class="cal-embed" id="my-cal-inline-traffic"></div>
+  </section>
 </Layout>
 
 <script>
@@ -147,6 +160,8 @@ const steps = [
   Cal('init', 'advice', { origin: 'https://cal.com' });
   // @ts-ignore
   Cal('init', 'assessment', { origin: 'https://cal.com' });
+  // @ts-ignore
+  Cal('init', 'traffic', { origin: 'https://cal.com' });
 
   // @ts-ignore
   Cal.ns.advice('inline', {
@@ -160,6 +175,12 @@ const steps = [
     calLink: 'rahmi-pruitt-bkdztz/business',
     config: { layout: 'month_view' },
   });
+  // @ts-ignore
+  Cal.ns.traffic('inline', {
+    elementOrSelector: '#my-cal-inline-traffic',
+    calLink: 'rahmi-pruitt-bkdztz/agent-traffic',
+    config: { layout: 'month_view' },
+  });
 
   // @ts-ignore
   Cal.ns.advice('ui', {
@@ -170,6 +191,13 @@ const steps = [
   });
   // @ts-ignore
   Cal.ns.assessment('ui', {
+    theme: 'dark',
+    styles: { branding: { brandColor: '#e8622b' } },
+    hideEventTypeDetails: false,
+    layout: 'month_view',
+  });
+  // @ts-ignore
+  Cal.ns.traffic('ui', {
     theme: 'dark',
     styles: { branding: { brandColor: '#e8622b' } },
     hideEventTypeDetails: false,
@@ -246,9 +274,12 @@ const steps = [
 
   .advice-section { padding-bottom: 90px; }
   .advice-section h2 { font-size: 1.8rem; margin: 10px 0 12px; }
-  .book-section { padding-bottom: 130px; }
+  .book-section { padding-bottom: 90px; }
   .book-section h2 { font-size: 1.8rem; margin: 10px 0 12px; }
+  .traffic-section { padding-bottom: 130px; }
+  .traffic-section h2 { font-size: 1.8rem; margin: 10px 0 12px; }
   .book-lede { max-width: 58ch; margin-bottom: 24px; }
+  .inline-link { color: var(--signal-bright); border-bottom: 1px solid var(--signal); }
   .cal-embed {
     width: 100%;
     height: 700px;
