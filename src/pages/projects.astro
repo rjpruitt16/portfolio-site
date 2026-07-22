@@ -36,7 +36,7 @@ import ProjectCard from '../components/ProjectCard.astro';
     <ProjectCard
       tag="OPEN SOURCE // MIT LICENSE"
       name="Aquifer"
-      pitch="A self-hosted Go runtime built for the moment an agent workload stops being a toy: durable queuing, controlled dispatch, and backpressure so a traffic spike doesn't take down the backend it's calling."
+      pitch="A self-hosted Go runtime built for the moment an agent's retries turn into a billing problem: an uncontrolled retry storm means repeated, wasted calls to your LLM provider — not just a reliability risk, but real spend. Aquifer queues durably, paces dispatch so retries never stampede, and verifies caller identity via the L8 protocol's public-key signatures — no shared secrets to leak."
       bullets={[
         'Durable job queue with SQLite persistence and crash recovery — no external database required',
         'Per-upstream rate limiting and dynamic pacing driven by the upstream’s own response headers',
