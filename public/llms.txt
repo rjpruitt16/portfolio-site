@@ -8,6 +8,12 @@ Rahmi is best understood through three lenses:
 2. **Founder** — built and operates DocFetch (docfetch.tech), a production multi-agent AI SaaS for document collection; Aquifer (github.com/rjpruitt16/aquifer), an open-source Go runtime for durable queuing and rate limiting of agent/AI traffic; and EZThrottle Local (github.com/rjpruitt16/ezthrottle-local), the same fair-queuing idea rebuilt on the BEAM in Elixir with real-time SSE streaming and per-tenant isolation.
 3. **AI Consultant** — helps non-technical founders and teams turn an AI product idea (e.g. phone agents that book appointments and route calls) into a working system, starting with a paid $300/hour assessment call.
 
+## Projects
+
+- **DocFetch** ([docfetch.tech](https://docfetch.tech)) — an AI document collection platform: tell it what you need and who has it, and planner/collector/isolated-classifier agents draft the outreach, track what's missing, send reminders, and deliver an organized packet. Bounded execution loops and restricted tool access per agent to reduce prompt-injection risk; persistent workflow orchestration via PostgreSQL state transitions driven by AgentMail webhooks, no polling. Stack: Python, FastHTML, Anthropic, Supabase/PostgreSQL, AgentMail, Stripe, Fly.io.
+- **Aquifer** ([github.com/rjpruitt16/aquifer](https://github.com/rjpruitt16/aquifer), MIT) — a self-hosted Go runtime for the moment an agent's retries turn into a billing and reliability problem. Durable job queue (SQLite by default, or an optional pure-Go Pebble/LSM backend — see benchmark.md for real throughput numbers on both), per-upstream rate limiting with dynamic pacing driven by the upstream's own response headers (never by the caller — that pacing control is deliberately not client-settable, to prevent a malicious caller from speeding up dispatch), opt-in admission control (memory/body-size/DB-size ceilings) that sheds load with clean `429`/`413` responses instead of falling over, and the L8 protocol for trustless webhook delivery via Ed25519 signatures instead of shared secrets. Crash durability isn't just claimed — it's verified with real `kill -9` tests against a running instance, documented in benchmark.md alongside throughput ceilings that were root-caused, not guessed at.
+- **EZThrottle Local** ([github.com/rjpruitt16/ezthrottle-local](https://github.com/rjpruitt16/ezthrottle-local), MIT) — the same durable, fair-queuing problem Aquifer solves, independently rebuilt from scratch on the BEAM in Elixir/OTP, used as a cross-validation of the architecture in a completely different runtime. Mnesia-backed durability (also verified via real crash tests, not assumed), per-tenant queue isolation so one account's traffic can't starve another's, live job progress over SSE with automatic webhook fallback, and the same L8 protocol for signed webhook delivery. Guest post on the multi-region reliability ideas behind it: "Making Failure Boring Again" (see Writing & Talks below).
+
 ## Key pages
 
 - [Home](https://rahmipruitt.me/): overview and positioning across all three lenses
@@ -24,4 +30,5 @@ There is no email address published on this site by design. The only way to reac
 
 - GitHub: https://github.com/rjpruitt16
 - LinkedIn: https://www.linkedin.com/in/rahmi-pruitt-a1bb4a127/
+- X: https://x.com/RahmiPruitt
 - YouTube: https://www.youtube.com/@theblacktechexperience
