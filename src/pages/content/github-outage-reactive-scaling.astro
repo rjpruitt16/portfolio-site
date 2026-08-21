@@ -26,6 +26,10 @@ const footnotes = [
     text: 'EZThrottle Local, a related BEAM-based implementation for self-hosted pacing and local traffic control',
     href: 'https://github.com/rjpruitt16/ezthrottle-local',
   },
+  {
+    text: 'IncidentHub\'s writeup of the August 6, 2026 GitHub Actions outage, root-caused to a capacity and concurrency weakness exposed by a routine deployment',
+    href: 'https://blog.incidenthub.cloud/github-actions-pages-outage-aug-6-2026',
+  },
 ];
 ---
 <Layout
@@ -101,8 +105,9 @@ const footnotes = [
 
       <p>
         But at Layer 7, a load balancer can watch a fleet get half-taken out by capacity pressure and
-        continue routing traffic until the fleet is fully saturated. Then the answer is usually pushed
-        to the client: "Use better retries. Add jitter. Add exponential backoff. Add a circuit breaker."
+        continue routing traffic until the fleet is fully saturated. The standard response is to add
+        more capacity and push the rest back onto the client: "Use better retries. Add jitter. Add
+        exponential backoff. Add a circuit breaker."
       </p>
 
       <p>
@@ -227,6 +232,17 @@ const footnotes = [
         necessary. They are just not the whole control loop.
       </p>
 
+      <hr class="rule post-divider" />
+
+      <p class="post-footer-note">
+        <strong>A pattern worth naming:</strong> this wasn't GitHub's first concurrency-driven outage
+        this month. An August 6 incident — a separate capacity and concurrency weakness in the Actions
+        pipeline — happened eleven days earlier.<sup><a href="#fn7">7</a></sup> Both got folded into the
+        same fix: retry limits, retry budgets, and variable timeouts across service-to-service
+        interactions.<sup><a href="#fn1">1</a></sup> Twice in eleven days is not bad luck. It's a system
+        pattern.
+      </p>
+
       <p class="post-pullquote post-closer">
         Load balancers spread traffic.<br />
         They do not stop stampedes.
@@ -310,6 +326,18 @@ const footnotes = [
   }
 
   .post-divider { max-width: 68ch; margin: 40px 0; }
+
+  .post-footer-note {
+    font-size: 0.95rem;
+    max-width: 62ch;
+    color: var(--paper-dim);
+    background: var(--ink-raised);
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    padding: 20px 24px;
+    margin: 0 0 40px;
+  }
+  .post-footer-note strong { color: var(--paper); }
 
   .post-pullquote {
     font-family: var(--font-display);
