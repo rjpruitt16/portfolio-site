@@ -19,6 +19,10 @@ const footnotes = [
     href: 'https://cursor.com/blog/git-at-any-scale',
   },
   {
+    text: 'Aquifer, a self-hosted agent-native load balancer and traffic coordination layer for agent workloads',
+    href: 'https://github.com/rjpruitt16/aquifer',
+  },
+  {
     text: 'EZThrottle Local, a related BEAM-based implementation for self-hosted pacing and local traffic control',
     href: 'https://github.com/rjpruitt16/ezthrottle-local',
   },
@@ -170,7 +174,7 @@ const footnotes = [
         Aquifer is a self-hosted agent-native load balancer and traffic coordination layer for agent
         workloads. It absorbs bursts into a durable queue, dispatches at a controlled rate, and lets
         upstream services dynamically slow it down with <code>X-Aqueduct-*</code> response headers
-        before overload turns into 429s or cascading failures.
+        before overload turns into 429s or cascading failures.<sup><a href="#fn5">5</a></sup>
       </p>
 
       <p>
@@ -209,7 +213,7 @@ const footnotes = [
         I also built EZThrottle Local as a related BEAM-based implementation. It explores the same core
         belief from a different runtime: spiky agentic traffic should be paced before it becomes
         everyone's outage. EZThrottle Local leans into BEAM tradeoffs like hot-code reloading and
-        preserving queues during updates.<sup><a href="#fn5">5</a></sup>
+        preserving queues during updates.<sup><a href="#fn6">6</a></sup>
       </p>
 
       <p>That is a mouthful, so here is the simpler version:</p>
@@ -234,7 +238,7 @@ const footnotes = [
       <p class="post-footer-note">
         <strong>A pattern worth naming:</strong> this wasn't GitHub's first concurrency-driven outage
         this month. An August 6 incident — a separate capacity and concurrency weakness in the Actions
-        pipeline — happened eleven days earlier.<sup><a href="#fn6">6</a></sup> Both got folded into the
+        pipeline — happened eleven days earlier.<sup><a href="#fn7">7</a></sup> Both got folded into the
         same fix: retry limits, retry budgets, and variable timeouts across service-to-service
         interactions.<sup><a href="#fn1">1</a></sup> Twice in eleven days is not bad luck. It's a system
         pattern.
