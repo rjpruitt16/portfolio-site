@@ -1,0 +1,320 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const footnotes = [
+  {
+    text: 'GitHub official outage post, "The August 17 outage, and the work ahead"',
+    href: 'https://github.blog/news-insights/company-news/the-august-17-outage-and-the-work-ahead/',
+  },
+  {
+    text: "The Register's technical summary of the autoscaling failure, Istio sidecar concurrency limit, saturated load balancers, and VS Code retry bug",
+    href: 'https://www.theregister.com/saas/2026/08/19/github-blames-8-hour-outage-on-autoscaling-fail-and-vs-code-retry-storm/5289547/',
+  },
+  {
+    text: 'a16z, "Big Ideas 2026," on agent-native infrastructure becoming table stakes',
+    href: 'https://a16z.com/newsletter/big-ideas-2026-part-1/',
+  },
+  {
+    text: 'Cursor, "Git at any scale," on Continuity and Origin, and rethinking Git architecture around a write-ahead log',
+    href: 'https://cursor.com/blog/git-at-any-scale',
+  },
+  {
+    text: 'Aquifer, a self-hosted agent-native load balancer and traffic coordination layer for agent workloads',
+    href: 'https://github.com/rjpruitt16/aquifer',
+  },
+  {
+    text: 'EZThrottle Local, a related BEAM-based implementation for self-hosted pacing and local traffic control',
+    href: 'https://github.com/rjpruitt16/ezthrottle-local',
+  },
+];
+---
+<Layout
+  title="GitHub Outages Show the Limits of Reactive Scaling — Rahmi Pruitt"
+  description="GitHub's August 17 outage is a glimpse of what happens when demand becomes reactive faster than supply can scale — and why agent traffic needs pacing, not just better retries."
+>
+  <article class="wrap post">
+    <header class="post-header">
+      <p class="mono-tag">// writing</p>
+      <h1>GitHub Outages Show the Limits of Reactive Scaling</h1>
+      <p class="post-dek">Load balancers spread traffic. They don't stop stampedes.</p>
+      <p class="post-meta">August 2026 &middot; Rahmi Pruitt</p>
+    </header>
+
+    <div class="post-body">
+      <p>
+        On August 17, GitHub had a nearly eight-hour outage that is worth studying if you care about
+        agent infrastructure. The interesting part was not simply that GitHub had "too much traffic."
+        The interesting part was that a hidden concurrency limit was crossed, autoscaling was watching
+        the wrong layer, load balancers saturated, and retry behavior amplified demand during recovery.
+      </p>
+
+      <p>
+        GitHub says the outage lasted 7 hours and 47 minutes and disrupted GitHub.com, authentication,
+        GitHub Actions, APIs, pull requests, issues, and Copilot. The Register's writeup says the
+        immediate cause involved network saturation on load balancers after an Istio sidecar reached a
+        concurrency limit, with recovery worsened by a latent retry bug in Visual Studio Code.<sup><a href="#fn1">1</a></sup><sup><a href="#fn2">2</a></sup>
+      </p>
+
+      <p>
+        That is the hard part about reactive scaling. It works when the bottleneck is obvious and
+        demand is relatively well-behaved. It struggles when the system crosses a hidden limit and
+        clients react by creating even more demand.
+      </p>
+
+      <p>
+        I would bet GitHub already has retries, jitter, circuit breakers, load balancing, autoscaling,
+        and every other modern reliability pattern people tell you to use. This is GitHub, not
+        somebody's weekend Django app running on a potato. The lesson is not that those tools are bad.
+        The lesson is that they may not be enough when demand itself becomes reactive.
+      </p>
+
+      <p>
+        For people who care about benchmarking, this is familiar. A machine does not fail cleanly
+        after its stable limit. Once it gets past a certain concurrency point, extra requests do not
+        merely fail. They consume sockets, CPU, memory, database connections, queue slots, logs, and
+        worker time. Past the limit, failed work can start reducing the throughput of successful work.
+      </p>
+
+      <p class="post-loop">
+        partial failure &rarr; retries &rarr; more traffic &rarr; more saturation &rarr; more errors &rarr; more retries
+      </p>
+
+      <hr class="rule post-divider" />
+
+      <p>
+        What is interesting to me is that, at lower layers of the internet, we already understand
+        pacing. We do not just flood networks with packets forever and hope for the best. We listen
+        for congestion signals. We speed up. We slow down.
+      </p>
+
+      <p>
+        But at Layer 7, a load balancer can watch a fleet get half-taken out by capacity pressure and
+        continue routing traffic until the fleet is fully saturated. Then the answer is usually pushed
+        to the client: "Use better retries. Add jitter. Add exponential backoff. Add a circuit breaker."
+      </p>
+
+      <p>
+        Those tools are good. They have carried the industry for a long time. But agents threaten the
+        assumptions underneath them.
+      </p>
+
+      <p>
+        To be clear, when I say agent-native infrastructure, I do not mean infrastructure controlled by
+        agents. I mean infrastructure built with agents in mind: bursty traffic, recursive workflows,
+        parallel tool calls, retries, long-running jobs, shared downstream limits, and workloads that
+        can move much faster than human clicking speed.
+      </p>
+
+      <p>
+        For most of the web, one human action roughly maps to one request, or at least a predictable
+        handful of requests. Agents change that. One user goal can fan out into many tool calls, API
+        calls, browser sessions, database queries, CI jobs, model calls, retries, and follow-up tasks.
+      </p>
+
+      <p>
+        That is why agent-native infrastructure is becoming a real category and not just marketing
+        soup. Other people are starting to point at the same shift: a16z has written about agent
+        workloads creating coordination problems around routing, locking, state management, and policy
+        enforcement across massive parallel execution.<sup><a href="#fn3">3</a></sup> I'd add pacing and
+        fairness to that list — deciding how fast work should be allowed to flow, and making sure one
+        workload's burst doesn't starve everyone else's.
+      </p>
+
+      <p>
+        GitHub is also in a unique position. It has a massive free product that agents, editors, CI
+        systems, and developer tools can all push against at their own pace. Unlike platforms that can
+        simply price every call or hide behind strict quotas, GitHub has to provide a globally reliable
+        developer platform that many machines treat as shared infrastructure.
+      </p>
+
+      <p>
+        New architectures like Cursor's Origin are interesting here too. Origin is built on Continuity,
+        Cursor's storage layer, which rethinks Git hosting around a write-ahead log in S3-compatible
+        object storage, with replicas catching up from that source of truth. That may improve the
+        origin side of Git hosting.<sup><a href="#fn4">4</a></sup>
+      </p>
+
+      <p>
+        But even better origins do not remove the downstream problem. If a push, webhook, CI trigger,
+        deployment pipeline, or agent workflow fans out to systems like Depot, Vercel, Buildkite, GitHub
+        Actions, caches, databases, or internal APIs, those consumers still have to absorb the burst.
+        Storage architecture can move a bottleneck. It does not magically pace every downstream system
+        that reacts to the event.
+      </p>
+
+      <p class="post-pullquote">
+        Reactive systems scale supply. Retry storms amplify demand.<br />
+        When demand reacts faster than supply can scale, the missing layer is not just load balancing.
+        It is demand shaping.
+      </p>
+
+      <p>I built Aquifer around that missing control loop.</p>
+
+      <hr class="rule post-divider" />
+
+      <p>
+        Aquifer is a self-hosted agent-native load balancer and traffic coordination layer for agent
+        workloads. It absorbs bursts into a durable queue, dispatches at a controlled rate, and lets
+        upstream services dynamically slow it down with <code>X-Aqueduct-*</code> response headers
+        before overload turns into 429s or cascading failures.<sup><a href="#fn5">5</a></sup>
+      </p>
+
+      <p>
+        Aquifer is not a load balancer that only asks, "Which backend should receive this request?" It
+        also asks, "Should this request run right now?"
+      </p>
+
+      <p>
+        It accepts work through an MCP adapter or HTTP API, persists jobs durably, drains them at a
+        controlled rate, sends completion through webhooks, and lets clients stream job status while
+        waiting in line. In the MCP use case, agents call Aquifer instead of racing each other directly
+        against the same backend or external API. Aquifer returns a job ID immediately, dispatches at a
+        controlled rate, and delivers the result to a webhook.
+      </p>
+
+      <p>
+        The backend can also send capacity signals back through headers. If the target service is
+        degraded, it can tell Aquifer to slow down. If the service is healthy, Aquifer can increase the
+        rate. The idea is not to destroy the fleet and then ask clients to behave better afterward. The
+        idea is to keep the fleet inside a survivable operating range.
+      </p>
+
+      <p>
+        Fairness matters too. Aquifer can isolate queues by user or queue key, so one noisy neighbor
+        does not ruin the experience for everyone else. That matters more in an agent world because one
+        person's workflow might launch a lot more work than a human ever would manually.
+      </p>
+
+      <p>
+        I also built EZThrottle Local as a related BEAM-based implementation. It explores the same core
+        belief from a different runtime: spiky agentic traffic should be paced before it becomes
+        everyone's outage. EZThrottle Local leans into BEAM tradeoffs like hot-code reloading and
+        preserving queues during updates.<sup><a href="#fn6">6</a></sup>
+      </p>
+
+      <p>That is a mouthful, so here is the simpler version:</p>
+
+      <p>
+        Agent-native load balancing is not about seeing traffic spikes on your backend dashboard. The
+        real pressure often lands on finite shared resources: databases, GPUs, CI runners, caches,
+        search indexes, token services, internal APIs, and third-party platforms. Those resources cannot
+        always scale instantly. Every request beyond their safe limit can start a cascading error cycle.
+      </p>
+
+      <p>You may not feel this pain today.</p>
+
+      <p>
+        But as agents become more common, the industry's default answer of retries, jitter, circuit
+        breakers, Kubernetes, and reactive autoscaling is going to get challenged. Those tools are still
+        necessary. They are just not the whole control loop.
+      </p>
+
+      <p class="post-pullquote post-closer">
+        Load balancers spread traffic.<br />
+        They do not stop stampedes.
+      </p>
+    </div>
+
+    <footer class="post-footnotes">
+      <hr class="rule" />
+      <ol>
+        {footnotes.map((f, i) => (
+          <li id={`fn${i + 1}`}>
+            {f.text}: <a href={f.href} target="_blank" rel="noopener" class="inline-link">{f.href}</a>
+          </li>
+        ))}
+      </ol>
+      <a href="/content/" class="btn-ghost post-back">&larr; Back to Writing &amp; Talks</a>
+    </footer>
+  </article>
+</Layout>
+
+<style>
+  .post { max-width: 800px; padding-top: 64px; padding-bottom: 100px; }
+  .post-header { margin-bottom: 40px; }
+  .post-header h1 {
+    font-size: clamp(2rem, 4.2vw, 2.8rem);
+    margin: 14px 0 16px;
+  }
+  .post-dek {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--paper-dim);
+    margin: 0 0 14px;
+  }
+  .post-meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    color: var(--paper-faint);
+    margin: 0;
+  }
+
+  .post-body p {
+    font-size: 1.05rem;
+    max-width: 68ch;
+    margin: 0 0 1.3em;
+  }
+  .post-body sup a {
+    color: var(--signal-bright);
+    font-size: 0.75em;
+  }
+  .post-body code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: var(--ink-raised);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--paper);
+  }
+
+  .post-loop {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    color: var(--signal-bright);
+    background: var(--ink-raised);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 18px 22px;
+    max-width: 68ch;
+  }
+
+  .post-divider { max-width: 68ch; margin: 40px 0; }
+
+  .post-pullquote {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    line-height: 1.35;
+    color: var(--paper);
+    max-width: 60ch;
+    margin: 36px 0;
+    padding-left: 20px;
+    border-left: 3px solid var(--signal);
+  }
+  .post-closer {
+    margin-top: 48px;
+    font-size: 1.6rem;
+  }
+
+  .post-footnotes { margin-top: 56px; }
+  .post-footnotes ol {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--paper-faint);
+    line-height: 1.8;
+    padding-left: 20px;
+    margin: 24px 0 36px;
+  }
+  .post-footnotes .inline-link {
+    color: var(--signal-bright);
+    border-bottom: 1px solid var(--signal);
+    word-break: break-all;
+  }
+  .post-back { display: inline-block; }
+
+  @media (max-width: 720px) {
+    .post-pullquote { font-size: 1.2rem; padding-left: 14px; }
+    .post-closer { font-size: 1.35rem; }
+  }
+</style>

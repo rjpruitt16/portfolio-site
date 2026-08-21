@@ -31,9 +31,22 @@ const videos = [
   </section>
 
   <section class="wrap post-section">
-    <p class="mono-tag">// guest post</p>
-    <p class="post-intro">
-      Wrote this for <a href="https://www.ezthrottle.network" target="_blank" rel="noopener" class="inline-link">EZThrottle</a>,
+    <p class="mono-tag">// latest post</p>
+    <a href="/content/github-outage-reactive-scaling/" class="post-card">
+      <div>
+        <span class="post-source mono-tag">RAHMIPRUITT.ME</span>
+        <h2>GitHub Outages Show the Limits of Reactive Scaling</h2>
+        <p>
+          GitHub's August 17 outage is a glimpse of what happens when demand becomes reactive faster
+          than supply can scale. Why retries, jitter, and circuit breakers aren't the whole control
+          loop once agent traffic enters the picture — and what pacing at Layer 7 actually looks like.
+        </p>
+      </div>
+      <span class="post-arrow">Read the post &rarr;</span>
+    </a>
+
+    <p class="post-intro" style="margin-top: 36px;">
+      Also wrote this for <a href="https://www.ezthrottle.network" target="_blank" rel="noopener" class="inline-link">EZThrottle</a>,
       a multi-region HTTP proxy that races outbound API calls across regions — the way Cloudflare
       routes inbound traffic, but for the requests your app makes to things like OpenAI and Stripe.
     </p>
