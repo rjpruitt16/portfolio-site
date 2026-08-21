@@ -40,6 +40,12 @@ const footnotes = [
       <p class="post-meta">August 2026 &middot; Rahmi Pruitt</p>
     </header>
 
+    <img
+      src="/images/blog/reactive-scaling-vs-demand-shaping-meme.png"
+      alt="Comic contrasting reactive scaling, where a load balancer is overrun by a stampede of retry traffic, with demand shaping, where the Aquifer mascot calmly organizes traffic into a queue"
+      class="post-image post-image-lead"
+    />
+
     <div class="post-body">
       <p>
         On August 17, GitHub had a nearly eight-hour outage that is worth studying if you care about
@@ -78,6 +84,12 @@ const footnotes = [
       <p class="post-loop">
         partial failure &rarr; retries &rarr; more traffic &rarr; more saturation &rarr; more errors &rarr; more retries
       </p>
+
+      <img
+        src="/images/blog/github-outage-retry-storm-diagram.png"
+        alt="Diagram of the six-step failure chain: traffic spike, hidden concurrency limit hit, autoscaler watching the wrong layer, load balancer saturation, client retries amplifying demand, and more errors with slower recovery"
+        class="post-image"
+      />
 
       <hr class="rule post-divider" />
 
@@ -185,6 +197,12 @@ const footnotes = [
         person's workflow might launch a lot more work than a human ever would manually.
       </p>
 
+      <img
+        src="/images/blog/aquifer-architecture-diagram.png"
+        alt="Diagram of Aquifer's architecture: agents and clients send requests through Aquifer, which handles queueing, pacing, fairness, retry budgets, and backpressure before dispatching to the downstream service, API, or MCP server"
+        class="post-image"
+      />
+
       <p>
         I also built EZThrottle Local as a related BEAM-based implementation. It explores the same core
         belief from a different runtime: spiky agentic traffic should be paced before it becomes
@@ -250,6 +268,17 @@ const footnotes = [
     color: var(--paper-faint);
     margin: 0;
   }
+
+  .post-image {
+    display: block;
+    width: 100%;
+    max-width: 68ch;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: #fff;
+    margin: 0 0 34px;
+  }
+  .post-image-lead { max-width: 100%; margin-bottom: 44px; }
 
   .post-body p {
     font-size: 1.05rem;
