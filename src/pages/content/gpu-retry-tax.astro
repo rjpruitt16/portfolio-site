@@ -1,0 +1,299 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const footnotes = [
+  {
+    text: 'GitHub, "The August 17 outage, and the work ahead"',
+    href: 'https://github.blog/news-insights/company-news/the-august-17-outage-and-the-work-ahead/',
+  },
+  {
+    text: 'Microsoft Azure status history, Azure OpenAI Service incident, May 29, 2026 (09:39-17:05 UTC) -- "a single failed request resulted in up to 48 additional retry attempts"',
+    href: 'https://azure.status.microsoft/en-us/status/history/?trackingId=LYXT-C1Z',
+  },
+  {
+    text: 'Marc Brooker, "Exponential Backoff and Jitter," AWS Architecture Blog',
+    href: 'https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/',
+  },
+  {
+    text: 'Cockroach Labs, "The Thundering Herd Problem in Agentic AI"',
+    href: 'https://www.cockroachlabs.com/blog/agentic-ai-thundering-herd-problem/',
+  },
+  {
+    text: 'Datadog, "State of AI Engineering 2026"',
+    href: 'https://www.datadoghq.com/state-of-ai-engineering/',
+  },
+  {
+    text: 'NVIDIA, "Introducing NVIDIA Dynamo, A Low-Latency Distributed Inference Framework"',
+    href: 'https://developer.nvidia.com/blog/introducing-nvidia-dynamo-a-low-latency-distributed-inference-framework-for-scaling-reasoning-ai-models/',
+  },
+  {
+    text: 'Aquifer, a self-hosted agent-native load balancer and traffic coordination layer for agent workloads',
+    href: 'https://github.com/rjpruitt16/aquifer',
+  },
+  {
+    text: 'EZThrottle Local, a related BEAM-based implementation for self-hosted pacing and local traffic control',
+    href: 'https://github.com/rjpruitt16/ezthrottle-local',
+  },
+];
+---
+<Layout
+  title="Eliminate GPU Waste by Cutting the Retry Tax — Rahmi Pruitt"
+  description="Retries aren't free. A look at how retry amplification wastes GPU capacity during inference, and why pacing demand instead of rejecting it can turn excess load into waiting time instead of wasted compute."
+  image="https://rahmipruitt.me/images/blog/gpu-retry-tax-meme.png"
+>
+  <article class="wrap post">
+    <header class="post-header">
+      <p class="mono-tag">// writing</p>
+      <h1>Eliminate GPU Waste by Cutting the Retry Tax</h1>
+      <p class="post-dek">Turn excess demand into waiting time, not excess attempts.</p>
+      <p class="post-meta">August 2026 &middot; Rahmi Pruitt</p>
+    </header>
+
+    <img
+      src="/images/blog/gpu-retry-tax-meme.png"
+      alt="Comic contrasting a classic retry storm, where cascading retries set a server fleet on fire while an engineer panics, with Aquifer's dynamic pacing gateway, which smooths incoming requests into a steady controlled flow toward a healthy GPU pool"
+      class="post-image post-image-lead"
+    />
+
+    <div class="post-body">
+      <p>
+        In my previous article, <a href="/content/github-outage-reactive-scaling/" class="inline-link">I proposed an agent-native load balancer</a> built
+        around the unique traffic patterns of agents.
+      </p>
+
+      <p>
+        GitHub recently showed why this matters. A latent retry bug amplified Copilot traffic from
+        roughly 7-9K requests per second to 70-100K RPS, delaying recovery during an outage.<sup><a href="#fn1">1</a></sup>
+      </p>
+
+      <p>
+        Aquifer is designed to mitigate this kind of retry amplification. Instead of immediately
+        rejecting excess work and forcing every client to retry independently, it queues requests and
+        dynamically paces them against downstream capacity.
+      </p>
+
+      <p class="post-pullquote">
+        Dynamic pacing turns excess demand into waiting time instead of excess attempts.
+      </p>
+
+      <p>That becomes especially interesting with GPUs.</p>
+
+      <p>
+        At an illustrative $5 per GPU-hour, a fleet of 100,000 GPUs represents <strong>$500,000 of
+        compute every hour</strong>. Even a small percentage of wasted capacity caused by retries,
+        duplicate inference, or abandoned work can become expensive quickly.
+      </p>
+
+      <p>
+        We don't currently have good public numbers showing how much GPU capacity the industry wastes
+        on retries. <strong>Inference providers should measure it.</strong>
+      </p>
+
+      <p>
+        Microsoft recently demonstrated how extreme retry amplification can become. During its May 29
+        Azure OpenAI outage, which lasted 7 hours and 26 minutes, Microsoft reported that a single
+        failed request could generate <strong>up to 48 additional retry attempts</strong>.<sup><a href="#fn2">2</a></sup>
+      </p>
+
+      <p>
+        Those retries lacked sufficient backoff and jitter, and both remain important defenses. AWS
+        has shown that exponential backoff with jitter dramatically reduces wasted work under
+        contention.<sup><a href="#fn3">3</a></sup>
+      </p>
+
+      <p>But retries still aren't free.</p>
+
+      <p>
+        Agents make this more important because they operate at machine speed, fan out into parallel
+        requests, and retry automatically. Cockroach Labs has described this as a new thundering herd
+        problem for agent infrastructure.<sup><a href="#fn4">4</a></sup> Datadog also found that 60% of
+        the LLM-call span errors it observed in February 2026 were rate-limit errors.<sup><a href="#fn5">5</a></sup>
+      </p>
+
+      <p>
+        For GPU inference, repeated work can be particularly expensive. NVIDIA explicitly describes
+        KV-cache recomputation as wasted compute and designs its inference infrastructure to avoid
+        unnecessary prefill computation.<sup><a href="#fn6">6</a></sup>
+      </p>
+
+      <p class="post-pullquote">
+        Putting the burden of retrying on the client creates a tax for both the consumer and the
+        provider. Consumers pay in latency and repeated work. Providers pay in capacity, congestion,
+        slower recovery, and potentially wasted inference.
+      </p>
+
+      <p>So I think inference operators should start measuring a simple metric:</p>
+
+      <p class="post-loop">
+        How many physical inference attempts does it take to produce one successful logical request?
+      </p>
+
+      <p>And ultimately:</p>
+
+      <p class="post-loop">
+        How many GPU-seconds are being spent on retries, duplicate requests, abandoned inference, and
+        recomputation?
+      </p>
+
+      <p>That's the <strong>GPU retry tax</strong>.</p>
+
+      <hr class="rule post-divider" />
+
+      <p>
+        Traditional load balancers are good at deciding <strong>where</strong> a request should go.
+      </p>
+
+      <p>
+        For expensive workloads that can tolerate waiting, we also need infrastructure that decides
+        <strong>when</strong> that request should run.
+      </p>
+
+      <p>
+        Aquifer and EZThrottle Local explore that model by queueing excess work and dynamically pacing
+        execution instead of relying entirely on failure followed by client retries.<sup><a href="#fn7">7</a></sup><sup><a href="#fn8">8</a></sup>
+      </p>
+
+      <img
+        src="/images/blog/aquifer-mitigates-github-outage-diagram.png"
+        alt="Diagram comparing what happened in the GitHub outage (delayed internal endpoint, latent VS Code retry bug, Copilot traffic amplified 10x, delayed recovery) against how Aquifer's queue and paced admission would change the outcome: bounded load, fewer capacity-driven retries, faster recovery. Caption: mitigate, not magically eliminate -- backoff and jitter still matter"
+        class="post-image"
+      />
+
+      <p>
+        This won't fit every workload. Real-time voice or interactive chat may require extremely low
+        latency.
+      </p>
+
+      <p>But a huge class of AI work does not.</p>
+
+      <p class="post-pullquote">
+        Image generation, video generation, music generation, research agents, document processing,
+        batch inference, and long-running background agents can often tolerate waiting.
+      </p>
+
+      <p>For these workloads, waiting may be cheaper than retrying.</p>
+
+      <p>
+        Instead of provisioning GPUs around every instantaneous spike, we can queue work, pace
+        execution against available capacity, and scale when sustained useful demand actually requires
+        it.
+      </p>
+
+      <p>
+        That could mean fewer retry storms, higher GPU utilization, less wasted compute, and
+        potentially a greener inference stack.
+      </p>
+
+      <p class="post-pullquote post-closer">
+        Before buying another GPU, calculate your retry tax.
+      </p>
+    </div>
+
+    <footer class="post-footnotes">
+      <hr class="rule" />
+      <ol>
+        {footnotes.map((f, i) => (
+          <li id={`fn${i + 1}`}>
+            {f.text}: <a href={f.href} target="_blank" rel="noopener" class="inline-link">{f.href}</a>
+          </li>
+        ))}
+      </ol>
+      <a href="/content/" class="btn-ghost post-back">&larr; Back to Writing &amp; Talks</a>
+    </footer>
+  </article>
+</Layout>
+
+<style>
+  .post { max-width: 800px; padding-top: 64px; padding-bottom: 100px; }
+  .post-header { margin-bottom: 40px; }
+  .post-header h1 {
+    font-size: clamp(2rem, 4.2vw, 2.8rem);
+    margin: 14px 0 16px;
+  }
+  .post-dek {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--paper-dim);
+    margin: 0 0 14px;
+  }
+  .post-meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    color: var(--paper-faint);
+    margin: 0;
+  }
+
+  .post-image {
+    display: block;
+    width: 100%;
+    max-width: 68ch;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: #fff;
+    margin: 0 0 34px;
+  }
+  .post-image-lead { max-width: 100%; margin-bottom: 44px; }
+
+  .inline-link { color: var(--signal-bright); border-bottom: 1px solid var(--signal); }
+
+  .post-body p {
+    font-size: 1.05rem;
+    max-width: 68ch;
+    margin: 0 0 1.3em;
+  }
+  .post-body sup a {
+    color: var(--signal-bright);
+    font-size: 0.75em;
+  }
+
+  .post-loop {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    color: var(--signal-bright);
+    background: var(--ink-raised);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 18px 22px;
+    max-width: 68ch;
+  }
+
+  .post-divider { max-width: 68ch; margin: 40px 0; }
+
+  .post-pullquote {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    line-height: 1.35;
+    color: var(--paper);
+    max-width: 60ch;
+    margin: 36px 0;
+    padding-left: 20px;
+    border-left: 3px solid var(--signal);
+  }
+  .post-closer {
+    margin-top: 48px;
+    font-size: 1.6rem;
+  }
+
+  .post-footnotes { margin-top: 56px; }
+  .post-footnotes ol {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--paper-faint);
+    line-height: 1.8;
+    padding-left: 20px;
+    margin: 24px 0 36px;
+  }
+  .post-footnotes .inline-link {
+    color: var(--signal-bright);
+    border-bottom: 1px solid var(--signal);
+    word-break: break-all;
+  }
+  .post-back { display: inline-block; }
+
+  @media (max-width: 720px) {
+    .post-pullquote { font-size: 1.2rem; padding-left: 14px; }
+    .post-closer { font-size: 1.35rem; }
+  }
+</style>
