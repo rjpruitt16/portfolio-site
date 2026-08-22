@@ -248,6 +248,11 @@ const footnotes = [
         Load balancers spread traffic.<br />
         They do not stop stampedes.
       </p>
+
+      <p class="post-related">
+        Related: <a href="/content/gpu-retry-tax/" class="inline-link">Eliminate GPU Waste by Cutting the Retry Tax</a> —
+        the same retry-amplification problem, applied to GPU inference economics.
+      </p>
     </div>
 
     <footer class="post-footnotes">
@@ -339,6 +344,16 @@ const footnotes = [
     margin: 0 0 40px;
   }
   .post-footer-note strong { color: var(--paper); }
+
+  .post-related {
+    font-size: 0.92rem;
+    color: var(--paper-faint);
+    margin-top: 44px;
+  }
+  .post-related .inline-link {
+    color: var(--signal-bright);
+    border-bottom: 1px solid var(--signal);
+  }
 
   .post-pullquote {
     font-family: var(--font-display);
