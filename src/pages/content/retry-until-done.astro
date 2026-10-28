@@ -1,0 +1,307 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const results = 'https://github.com/rjpruitt16/aqueduct-benchmarks/blob/survival/envoy/RESULTS.md';
+
+const footnotes = [
+  {
+    text: 'aqueduct-benchmarks: the harness, the raw data from every run, and the full results with their caveats',
+    href: 'https://github.com/rjpruitt16/aqueduct-benchmarks',
+  },
+  {
+    text: 'Chains: nothing is given up, everyone retries until it works',
+    href: `${results}#chains-nothing-is-given-up-everyone-retries-until-it-works`,
+  },
+  {
+    text: 'Wild: retries stacked across a chain of services',
+    href: `${results}#wild-retries-stacked-across-a-chain-of-services`,
+  },
+  {
+    text: 'Survival: capacity arrives late',
+    href: `${results}#survival-capacity-arrives-late`,
+  },
+  {
+    text: 'Wild, with Envoy plus what a team would build itself',
+    href: `${results}#wild-with-envoy-plus-what-a-team-would-build-itself`,
+  },
+  {
+    text: 'Aquifer, a self-hosted agent-native load balancer',
+    href: 'https://github.com/rjpruitt16/aquifer',
+  },
+];
+---
+<Layout
+  title="Retrying Forever Should Be Safe — Rahmi Pruitt"
+  description="What five load tests of Envoy and Aquifer taught me: a refusal doesn't make work go away, callers retry until it's done, and a queue that recognizes a retry makes that safe."
+>
+  <article class="wrap post">
+    <header class="post-header">
+      <p class="mono-tag">// writing</p>
+      <h1>Retrying Forever Should Be Safe</h1>
+      <p class="post-dek">Five load tests of Envoy and Aquifer, and the lesson that kept coming back.</p>
+      <p class="post-meta">October 2026 &middot; Rahmi Pruitt &middot; <a href="https://x.com/RahmiPruitt" target="_blank" rel="noopener" class="post-meta-link">@RahmiPruitt</a></p>
+    </header>
+
+    <div class="post-body">
+      <p>
+        Over the last few days I've been benchmarking Aquifer, the agent-native load balancer I'm building,
+        against Envoy. Five load patterns on Fly.io, from steady traffic to retries stacked across a
+        chain of services to capacity that shows up late. The harness and the raw data from every run
+        are public.<sup><a href="#fn1">1</a></sup>
+      </p>
+
+      <p>
+        I went in to find out where Aquifer beats Envoy. I came out thinking that was the wrong
+        question.
+      </p>
+
+      <h2>A refusal doesn't make the work go away</h2>
+
+      <p>
+        Envoy is very good at deciding where a request goes and at turning away what the backend can't
+        take. But the work it turns away still needs doing. Its caller retries, and in practice callers
+        retry until the work is done. Services, SDKs and agents don't give up after a fixed deadline.
+        Some back off politely and some hammer, but they all come back.
+      </p>
+
+      <p>So I measured what happens when they do.</p>
+
+      <p>
+        <strong>When every caller retries until its work is done,</strong> Envoy needed 3.5 requests per
+        job. Aquifer needed 1.0 and finished slightly more work.<sup><a href="#fn2">2</a></sup> Under Envoy,
+        tenants that retried aggressively got 50% more work done than polite tenants with the same
+        demand. Under Aquifer they got the same share and the same latency, whatever their retry style
+        or region.
+      </p>
+
+      <p>
+        <strong>When retries stack up across services,</strong> it gets worse. Four services, each
+        retrying 3 times, can turn one client request into 27 calls at the bottom. Behind Envoy, the
+        backend spent 55&ndash;58% of its executions redoing work it had already finished. Behind
+        Aquifer, about 0.1%, because a resend carries the same idempotency key and joins the job already
+        waiting. The same backend completed about 2.2 times as many requests.<sup><a href="#fn3">3</a></sup>
+      </p>
+
+      <p>
+        <strong>When capacity arrives late,</strong> with traffic at three times capacity and new workers
+        showing up minutes later, Aquifer ran every job at every delay. Envoy, even with limits sized
+        for the capacity it would eventually get, ran 95%, 88% and 67% as the new capacity arrived 3, 5
+        and 10 minutes into the overload.<sup><a href="#fn4">4</a></sup>
+      </p>
+
+      <p class="post-pullquote">
+        Retries aren't the problem. A retry that the system can't recognize is.
+      </p>
+
+      <h2>I was calling Aquifer wrong</h2>
+
+      <p>
+        The first round of the late-capacity test went badly for Aquifer. With capacity 3 minutes away,
+        Envoy answered 95% of callers in time and Aquifer 78%.
+      </p>
+
+      <p>Two things were wrong, and neither was the queue.</p>
+
+      <p>
+        First, Aquifer held a connection open for every waiting caller. Fly caps a process at 10,240
+        open files, and at the peak it was holding far more. Once it ran out it couldn't accept
+        connections, so callers couldn't reach results that were already waiting for them. Now it caps
+        its connections, and tells callers who are far back in line when to come back instead of holding
+        them.
+      </p>
+
+      <p>
+        Second, the callers used exponential backoff with jitter. That's the right way to call a proxy,
+        which forgets your request the moment it refuses it. It's the wrong way to call a queue, which
+        keeps your job. A caller asleep in backoff can sleep right through
+        a result that's already done. The backoff client missed 4&ndash;5% of results that finished in time.
+        Clients that came back when Aquifer told them to missed none.
+      </p>
+
+      <p>
+        With both fixed, Aquifer answered every caller in time when capacity came within 3 minutes.
+      </p>
+
+      <h2>What this makes safe</h2>
+
+      <p>
+        With an idempotency key, a retry stops being new work. It becomes a cheap question: is my job
+        done yet? That changes what a reasonable client looks like. Instead of a backoff policy tuned to
+        avoid making things worse, a caller can submit once and keep checking, every 30 seconds or when
+        the server says to, for as long as it takes.
+      </p>
+
+      <p class="post-loop">
+        Submit once with a key. Come back when told. Stop when the job is completed or failed.
+      </p>
+
+      <p>
+        For agents that fan out, retry automatically and run for hours, that's the contract I want:
+        unbounded retries that cost almost nothing.
+      </p>
+
+      <hr class="rule post-divider" />
+
+      <h2>Where it doesn't help</h2>
+
+      <p>
+        <strong>You can build most of this yourself.</strong> Envoy plus idempotency keys in Redis, a fair
+        queue and a dispatcher of about 500 lines matched Aquifer under stacked
+        retries.<sup><a href="#fn5">5</a></sup> What Aquifer saves you is building and owning that.
+      </p>
+
+      <p>
+        <strong>It needs a stable key and the backend's headers.</strong> Without either, it lost most of
+        its advantage.
+      </p>
+
+      <p>
+        <strong>Big tenants wait longer.</strong> Aquifer gives every tenant an equal turn, so a tenant
+        sending half the traffic doesn't get half the backend. That's deliberate: a long line shouldn't
+        buy more capacity. A backend that wants to favor a customer can say so in the limits it
+        advertises.
+      </p>
+
+      <p>
+        <strong>A caller with a hard deadline is better off elsewhere.</strong> With capacity 10 minutes
+        away, Envoy answered more of the callers that gave up after 5 minutes. Aquifer ran all the work,
+        but only for callers that come back. Something that needs an answer in seconds belongs on a live
+        connection to a backend with room to spare.
+      </p>
+
+      <p>
+        <strong>The test has limits.</strong> The backend is synthetic, with a fixed service time and no
+        database. The last round reran Aquifer with a fix and three client variants, and didn't rerun
+        Envoy. An independent review recomputed the numbers from the raw data and they match, and its
+        criticisms are in the write-up.
+      </p>
+
+      <h2>Envoy and Aquifer, not Envoy or Aquifer</h2>
+
+      <p>
+        Envoy routes and refuses. Aquifer remembers. Put Aquifer behind Envoy and Envoy keeps doing what
+        it's best at, TLS, routing, auth and turning away abuse, while it can afford looser limits,
+        because the work it lets through no longer has to fit the backend at that instant. Aquifer
+        holds it, shares the backend fairly between tenants and paces it at the rate the backend says it
+        can take.<sup><a href="#fn6">6</a></sup>
+      </p>
+
+      <p>
+        I haven't measured the two running together yet, and that's the honest gap in this. Envoy's
+        defaults are built for short requests, so the route to Aquifer needs longer stream timeouts and
+        higher connection limits. I'd also like to see Envoy read the same headers Aquifer follows,
+        maybe as a filter. Next up is Hatchet: the harness is built, and two reported Hatchet issues
+        already reproduce on the version I pinned.
+      </p>
+
+      <p class="post-pullquote post-closer">
+        Make retrying forever safe. Then let callers do it.
+      </p>
+    </div>
+
+    <footer class="post-footnotes">
+      <hr class="rule" />
+      <ol>
+        {footnotes.map((f, i) => (
+          <li id={`fn${i + 1}`}>
+            {f.text}: <a href={f.href} target="_blank" rel="noopener" class="inline-link">{f.href}</a>
+          </li>
+        ))}
+      </ol>
+      <a href="/content/" class="btn-ghost post-back">&larr; Back to Writing &amp; Talks</a>
+    </footer>
+  </article>
+</Layout>
+
+<style>
+  .post { max-width: 800px; padding-top: 64px; padding-bottom: 100px; }
+  .post-header { margin-bottom: 40px; }
+  .post-header h1 {
+    font-size: clamp(2rem, 4.2vw, 2.8rem);
+    margin: 14px 0 16px;
+  }
+  .post-dek {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--paper-dim);
+    margin: 0 0 14px;
+  }
+  .post-meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    color: var(--paper-faint);
+    margin: 0;
+  }
+  .post-meta-link {
+    color: var(--signal-bright);
+    border-bottom: 1px solid var(--signal);
+  }
+
+  .inline-link { color: var(--signal-bright); border-bottom: 1px solid var(--signal); }
+
+  .post-body h2 {
+    font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+    max-width: 68ch;
+    margin: 48px 0 18px;
+  }
+  .post-body p {
+    font-size: 1.05rem;
+    max-width: 68ch;
+    margin: 0 0 1.3em;
+  }
+  .post-body sup a {
+    color: var(--signal-bright);
+    font-size: 0.75em;
+  }
+
+  .post-loop {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    color: var(--signal-bright);
+    background: var(--ink-raised);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 18px 22px;
+    max-width: 68ch;
+  }
+
+  .post-divider { max-width: 68ch; margin: 40px 0; }
+
+  .post-pullquote {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    line-height: 1.35;
+    color: var(--paper);
+    max-width: 60ch;
+    margin: 36px 0;
+    padding-left: 20px;
+    border-left: 3px solid var(--signal);
+  }
+  .post-closer {
+    margin-top: 48px;
+    font-size: 1.6rem;
+  }
+
+  .post-footnotes { margin-top: 56px; }
+  .post-footnotes ol {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--paper-faint);
+    line-height: 1.8;
+    padding-left: 20px;
+    margin: 24px 0 36px;
+  }
+  .post-footnotes .inline-link {
+    color: var(--signal-bright);
+    border-bottom: 1px solid var(--signal);
+    word-break: break-all;
+  }
+  .post-back { display: inline-block; }
+
+  @media (max-width: 720px) {
+    .post-pullquote { font-size: 1.2rem; padding-left: 14px; }
+    .post-closer { font-size: 1.35rem; }
+  }
+</style>
