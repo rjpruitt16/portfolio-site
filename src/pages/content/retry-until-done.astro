@@ -84,9 +84,10 @@ const footnotes = [
 
       <p>
         <strong>When capacity arrives late,</strong> with traffic at three times capacity and new workers
-        showing up minutes later, Aquifer ran every job at every delay. Envoy, even with limits sized
-        for the capacity it would eventually get, ran 95%, 88% and 67% as the new capacity arrived 3, 5
-        and 10 minutes into the overload.<sup><a href="#fn4">4</a></sup>
+        showing up minutes later, both finished every job, because their callers kept trying. What
+        differed was who waited. With capacity 10 minutes late, Aquifer's slowest caller waited about 11
+        minutes and Envoy's about 24. Aquifer cleared the backlog sooner, with about a third of the
+        requests from well-behaved callers.<sup><a href="#fn4">4</a></sup>
       </p>
 
       <p class="post-pullquote">
@@ -145,6 +146,13 @@ const footnotes = [
       <h2>Where it doesn't help</h2>
 
       <p>
+        <strong>Envoy answers the typical caller faster.</strong> A request Envoy lets through comes back
+        at once, so its median wait was far lower: half a second against 14&ndash;18 seconds with
+        capacity 3 minutes late. The cost lands on the callers it refuses, who back off again and
+        again. Under Envoy, who waits is luck. Under Aquifer, it's your place in line.
+      </p>
+
+      <p>
         <strong>You can build most of this yourself.</strong> Envoy plus idempotency keys in Redis, a fair
         queue and a dispatcher of about 500 lines matched Aquifer under stacked
         retries.<sup><a href="#fn5">5</a></sup> What Aquifer saves you is building and owning that.
@@ -163,9 +171,11 @@ const footnotes = [
       </p>
 
       <p>
-        <strong>A caller with a hard deadline is better off elsewhere.</strong> With capacity 10 minutes
-        away, Envoy answered more of the callers that gave up after 5 minutes. Aquifer ran all the work,
-        but only for callers that come back. Something that needs an answer in seconds belongs on a live
+        <strong>A caller with a hard deadline is better off elsewhere.</strong> I first ran the
+        late-capacity test with callers that gave up after 5 minutes. Aquifer still ran every job,
+        while Envoy ran 95%, 88% and 67% as capacity came 3, 5 and 10 minutes late. But with capacity
+        10 minutes away, Envoy answered more of those impatient callers, and only the ones that came
+        back collected Aquifer's results. Something that needs an answer in seconds belongs on a live
         connection to a backend with room to spare.
       </p>
 
