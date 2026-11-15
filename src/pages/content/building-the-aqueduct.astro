@@ -3,118 +3,123 @@ import Layout from '../../layouts/Layout.astro';
 ---
 <Layout
   title="Building the Aqueduct Before the City Arrives — Rahmi Pruitt"
-  description="Aquifer Nane’s technical foundations, competitive market, business model, and uncertain path toward adoption under Nane Labs."
+  description="Aquifer’s API aqueduct vision, the market it must earn, and why I’m building infrastructure before demand is certain."
 >
   <article class="wrap post">
     <header class="post-header">
       <p class="mono-tag">// writing</p>
       <h1>Building the Aqueduct Before the City Arrives</h1>
-      <p class="post-dek">The current position and strategic outlook of Aquifer Nane and Nane Labs, Inc.</p>
       <p class="post-meta">November 2026 &middot; Rahmi Pruitt &middot; <a href="https://x.com/RahmiPruitt" target="_blank" rel="noopener" class="post-meta-link">@RahmiPruitt</a></p>
     </header>
 
     <div class="post-body">
-      <h2>1. Company thesis and product</h2>
       <p>
-        I built Aquifer Nane with the ambition that it could become foundational infrastructure. My starting point was a persistent problem in distributed systems: when demand exceeds capacity, independently reasonable decisions—retrying a failed request, submitting another batch, protecting a service with a circuit breaker—can produce poor outcomes across the system.
+        I built Aquifer because I believe the internet will need better ways to coordinate demand. More software is acting on our behalf, more operations depend on shared services, and more participants are competing for capacity they do not control.
       </p>
       <p>
-        Aquifer Nane coordinates that demand. It is an Apache 2.0 open-source admission-control runtime written in Go, combining durable queuing, per-tenant fairness, idempotency, and backend-directed pacing. Accepted work can wait; duplicate submissions can join existing work; and capacity signals from the backend can govern delivery. The objective is useful work completed reliably, with deliberate allocation of constrained resources.
+        The engineering is already substantial. The market is still taking shape. That is what building the aqueduct before the city arrives means to me: investing in infrastructure for a future I believe in, while doing the work to discover where it belongs.
+      </p>
+      <h2>An API aqueduct</h2>
+      <p>
+        I call the category an <strong>API aqueduct</strong>. Aquifer brings together durable queuing, admission control, per-tenant fairness, idempotency, and backend-directed pacing. It holds accepted work, coordinates when that work moves, and adjusts delivery to the capacity available downstream.
       </p>
       <p>
-        This matters when several customers share a bottleneck. A large import should not automatically consume every opportunity available to smaller customers. A service recovering from overload should not immediately face another wave of uncoordinated retries. Aquifer Nane addresses both incoming demand and how applications consume downstream services.
+        The distinction helps explain why Aquifer does not fit neatly into the usual gateway categories. Its organizing purpose is the flow of work over time: who gets access, what waits, and how producers respond when capacity changes. A gateway can remain responsible for routing and other edge functions while Aquifer adds coordination behind it. Existing gateways are therefore potential integration points as well as alternatives.
       </p>
       <p>
-        I approached the project with the architectural seriousness I would bring to a company with substantial long-term potential. Its implementation, documentation, testing, and comparative benchmarks represent a significant investment. Endurance experiments have involved tens of millions of requests. This is functioning software, although independent production validation remains outstanding.
+        Consider several customers sharing a document-processing service. One submits a huge import while the others continue sending smaller jobs. A queue stores the backlog. The harder questions are whose work moves next, how much the backend can accept, and whether retries create more contention. Aquifer combines those decisions in a reusable runtime.
       </p>
       <p>
-        Aquifer Nane sits within Nane Labs’ broader mission: creating a fair, scalable, and equitable internet. Fair scheduling makes that mission concrete. It determines who receives service when capacity cannot satisfy everyone immediately.
+        Backend-directed pacing is central to that design. Capacity information returned through response headers lets the backend guide delivery. I want services to communicate pressure and producers to respond, across both inbound requests and outbound dependencies.
       </p>
       <p>
-        The present business position is early: no confirmed production customers, no external capital raised, and no established commercial validation. The technical foundation is substantially further developed than the business around it.
+        The fuller brand is <strong>Aquifer Nane</strong>, which I chose to distinguish it from existing uses of Aquifer and avoid naming conflicts. Nane means eight in Swahili. The repository and earlier writing use Aquifer; I use that shorter name here for the same project. Nane Labs, Inc. is the company behind the work.
       </p>
-      <h2>2. The market Aquifer Nane must earn a place in</h2>
       <p>
-        Aquifer Nane enters a market with capable products and established operating practices. Its competition includes both vendors and infrastructure teams’ own implementations.
+        I approached it with the seriousness I would bring to infrastructure that could support a very large company. Aquifer is written in Go and available under Apache 2.0, with substantial documentation, testing, and benchmark work. Endurance experiments have involved tens of millions of requests. This was a deliberate investment in a long-term foundation.
+      </p>
+      <h2>Finding a place among established systems</h2>
+      <p>
+        The market already has capable infrastructure. Aquifer must earn its place within it.
       </p>
       <div class="post-table-wrap">
         <table class="post-table">
-          <thead><tr><th>Existing approach</th><th>Why a team may reasonably stay with it</th></tr></thead>
+          <thead><tr><th>Existing approach</th><th>Why it may already be sufficient</th></tr></thead>
           <tbody>
-            <tr><td>Envoy and NGINX</td><td>Familiar traffic controls already protect services. Envoy supports circuit-breaking limits and retry budgets; NGINX can delay or reject excess requests through keyed rate limiting.</td></tr>
-            <tr><td>Hookdeck</td><td>Managed event infrastructure already provides durable queuing, controlled delivery, retries, and visibility, including support for agent-related workflows.</td></tr>
-            <tr><td>Temporal and workflow engines</td><td>Durable execution and task queues already handle substantial coordination. Temporal includes dispatch controls; another admission layer needs a specific justification.</td></tr>
-            <tr><td>Redis-backed queues and custom dispatchers</td><td>Teams can tailor fairness, idempotency, and pacing to their application while retaining architectural control.</td></tr>
+            <tr><td>Envoy and NGINX</td><td>Established traffic controls protect services. Envoy supports circuit-breaking limits and retry budgets; NGINX can delay or reject excess requests through keyed rate limiting.</td></tr>
+            <tr><td>Hookdeck</td><td>Managed event infrastructure supplies durable queuing, controlled delivery, retries, and visibility, including agent-related workflows.</td></tr>
+            <tr><td>Temporal and workflow engines</td><td>Durable execution, task queues, and dispatch controls already coordinate substantial amounts of work.</td></tr>
+            <tr><td>Redis-backed queues and custom dispatchers</td><td>Teams can implement application-specific fairness, idempotency, and pacing while retaining architectural control.</td></tr>
           </tbody>
         </table>
       </div>
       <p>
-        These products occupy different layers, but each can reduce the need for Aquifer Nane. Their capabilities also continue to evolve.<sup><a href="#fn1">[1–4]</a></sup>
+        These approaches occupy different layers, but each can address enough of the problem to make another dependency unnecessary.<sup><a href="#fn1">[1–4]</a></sup>
       </p>
       <p>
-        My strongest candidate market is teams with multiple producers sharing a constrained backend, where retry amplification, uneven tenant access, or changing capacity creates measurable operational cost. Aquifer Nane could sit behind an existing gateway or control a particular congested path. It need not replace an organization’s entire traffic architecture.
+        My benchmarks show both the opportunity and the strength of those alternatives. In the Envoy chained-workload experiment, clients retried until completion while load reached three times capacity and capacity later doubled. Across three runs per configuration, Envoy required approximately 3.5 requests per completed job versus 1.0 with Aquifer. Equally sized polite tenants had chain-completion p99 times of 1.9–2.8 minutes with Envoy, compared with about nine seconds across retry styles with Aquifer.<sup><a href="#fn5">[5]</a></sup>
       </p>
       <p>
-        The benchmarks help define that opportunity. In my Envoy chained-workload experiment, clients retried until completion while load reached three times capacity and capacity later doubled. Across three runs per configuration, Envoy required approximately 3.5 requests per completed job versus 1.0 with Aquifer Nane. For equally sized tenants, polite clients’ chain-completion p99 was 1.9–2.8 minutes with Envoy; Aquifer Nane’s was about nine seconds across retry styles.<sup><a href="#fn5">[5]</a></sup>
+        Rejection protected the backend, but client backoff extended waiting and rewarded aggressive retries. Coordinating admission changed that experience. In other regimes, Envoy served typical requests faster while Aquifer held more work for eventual completion.
       </p>
       <p>
-        That result illustrates how rejection and client backoff can increase end-to-end waiting and favor aggressive callers. It does not establish that circuit breaking is generally slow or inappropriate. In other regimes, Envoy served typical requests faster, while Aquifer Nane held more work for eventual completion.
+        Adding coordination to Envoy also worked. In the stacked-retry experiment, Envoy plus Redis idempotency and a fair dispatcher completed approximately 47,200–47,500 requests, compared with Aquifer’s 46,200–46,300, with similar small-tenant tail latency.<sup><a href="#fn5">[5]</a></sup> These synthetic tests establish behavior under their stated conditions; independent production validation remains the next step.
       </p>
       <p>
-        The stronger alternative changed the result. In the stacked-retry experiment, Envoy plus Redis idempotency and a fair dispatcher completed roughly 47,200–47,500 requests versus Aquifer Nane’s 46,200–46,300, with similar small-tenant tail latency. These were synthetic workloads, and the report documents limitations.<sup><a href="#fn5">[5]</a></sup>
+        The value proposition includes making these capabilities available together, reducing the engineering and maintenance required to assemble them. Calling it an API aqueduct gives that role a clearer identity. Customers still need a reason to adopt it.
       </p>
       <p>
-        The commercial proposition therefore includes reducing the work of building, integrating, and maintaining coordination—not possessing an algorithm nobody else can reproduce.
+        Customer discovery has generated considerable interest, but little urgent need. People can appreciate the architecture and recognize the problem while remaining satisfied with their existing systems. Attention and technical engagement have not yet become production commitments.
       </p>
       <p>
-        Four barriers follow. I have relevant Amazon and Twitch experience, but limited authority in this particular category. Coding agents make custom implementations easier, including for potential customers. My benchmarks remain founder-produced evidence rather than independent validation. And urgency varies: most recent outreach received no response; one prospect explained that it already had a system handling high volume at scale.
+        There are other barriers. My Amazon and Twitch experience gives me relevant foundations, but I am still building authority in this category. Benchmarks do not replace references from operators. Coding agents make custom infrastructure easier to build, including for the teams I hope to serve. Aquifer must offer enough ongoing value to justify integration and ownership.
+      </p>
+      <h2>The opportunity ahead</h2>
+      <p>
+        The underlying problem is established. Amazon’s Builders’ Library explains how retries at successive layers multiply load and how circuit-breaker behavior can delay recovery.<sup><a href="#fn6">[6]</a></sup> Fairness adds another question: whether access to capacity reflects an intentional policy or simply which clients retry hardest.
       </p>
       <p>
-        The recurring objection is credible: “We already handle this.” Aquifer Nane must improve an existing architecture enough to justify evaluation, integration, and operational ownership.
-      </p>
-      <h2>3. Evidence for future demand and commercial opportunity</h2>
-      <p>
-        There is evidence behind the problem, though no evidence that guarantees Aquifer Nane’s market.
+        Software-generated demand is also expanding. Cloudflare’s 2025 review reported more than fifteenfold growth in AI “user action” crawling, a category associated with users asking AI systems to retrieve information.<sup><a href="#fn7">[7]</a></sup> That is one visible signal of machines doing more work on people’s behalf.
       </p>
       <p>
-        Amazon’s Builders’ Library describes how retries at successive layers multiply load and how circuit-breaker behavior can delay recovery. These are established distributed-systems concerns, predating today’s agents.<sup><a href="#fn6">[6]</a></sup>
+        I expect autonomous agents and agent-to-agent communication to introduce more shared constraints: API quotas, browser pools, inference endpoints, and long-running processing services. Bidirectional pacing becomes interesting when participants can communicate available capacity and adjust demand across organizational boundaries.
       </p>
       <p>
-        There are also signs that software-generated demand is expanding. Cloudflare’s 2025 review reported more than fifteenfold growth in AI “user action” crawling—requests associated with users asking AI systems to retrieve information. That measures one traffic category across Cloudflare’s observations, not agent-to-agent transactions or demand for Aquifer Nane.<sup><a href="#fn7">[7]</a></sup>
+        Building the aqueduct before the city arrives does not mean assuming a city will appear wherever I choose. It means building useful capacity while learning where activity is gathering. The opportunity may emerge through a specialized agent workload, a congested integration, or a gateway that benefits from an additional coordination layer.
       </p>
       <p>
-        My hypothesis is that autonomous agents, longer-running operations, and communication between agents will create additional coordination boundaries. Multiple agents may compete for the same API quota, browser pool, inference endpoint, or processing service. Bidirectional pacing could help those participants communicate available capacity and adjust demand before overload becomes repeated failure.
+        I do not see this as a single opening that expires in 2027. New workloads create new entry points. Established providers will adapt too; my task is to find the situations where Aquifer’s combination of capabilities is worth adopting.
       </p>
       <p>
-        The opportunity is unlikely to depend on one calendar year. New workloads and integration patterns may create several entry points over time. However, established providers can capture those opportunities too. Aquifer Nane needs a specific customer problem and a credible distribution path each time.
+        The ambition can still be substantial. Envoy and NGINX show how important a widely adopted traffic layer can become. Vagrant offers another company-building example: it preceded HashiCorp, and its commercial VMware plugin helped fund subsequent tools.<sup><a href="#fn8">[8]</a></sup> Infrastructure can support ecosystems and businesses beyond its original use.
       </p>
       <p>
-        Infrastructure history provides a useful scale of ambition. Envoy and NGINX show the potential importance of a widely adopted traffic layer. Vagrant offers a different company-building precedent: it preceded HashiCorp, and its commercial VMware plugin helped fund subsequent tools.<sup><a href="#fn8">[8]</a></sup> These examples demonstrate possible paths; they do not establish comparable prospects for Nane Labs.
+        For Nane Labs, the proposed business model keeps the core open source, with implementation consulting, enterprise support, and optional private managed hosting. The first commercial proof would be a team obtaining sustained operational value and choosing to pay for help deploying or maintaining it.
       </p>
       <p>
-        My proposed commercial model keeps Aquifer Nane’s core open source, with implementation consulting, enterprise support, and optional private managed hosting around it. Early validation would mean a production team showing sustained operational improvement against its own baseline, followed by evidence that it values paid assistance. A broad infrastructure market estimate cannot substitute for those steps.
+        Distribution matters just as much. Benchmarks, integrations, practitioner relationships, and content creation can help people understand the work. As I build an audience, familiarity with my engineering and values may become a source of trust.
       </p>
       <p>
-        Distribution could develop through benchmarks, integrations, practitioner relationships, and content creation. Over time, an audience familiar with my engineering and values may make initial trust easier. Separately, agents could make open-source deployment accessible to non-programmers, expanding who can operate software. Both are plausible advantages to develop; neither is established customer demand.
+        I also see an opportunity beyond developers. Agents could make open-source software easier for non-programmers to deploy and operate. That would expand who can use infrastructure and make clear explanations, trustworthy maintainers, and practical outcomes increasingly important.
       </p>
-      <h2>4. Current outlook and strategic discipline</h2>
+      <h2>A foundation with room to grow</h2>
       <p>
-        My outlook remains optimistic, but I cannot assign a defensible probability of commercial success. Aquifer Nane may remain a useful project without becoming a substantial standalone business. The engineering can be sound while the commercial advantage proves insufficient.
-      </p>
-      <p>
-        That uncertainty has a personal cost. Building and testing a sophisticated system, then meeting silence, creates tension between technical conviction and market evidence. More engineering is not always the missing ingredient. I have to preserve the ability to recognize when an existing solution is sufficient.
+        I remain optimistic without treating commercial success as settled. Aquifer has no confirmed production customers or external investment. Interest must become adoption, and adoption must deliver enough value to sustain a business.
       </p>
       <p>
-        The open-source model gives me time and flexibility. Keeping Aquifer Nane available does not require operating an expensive hosted platform. I can pursue employment, contract work, content creation, and other ventures while maintaining the project and evaluating opportunities selectively. My livelihood does not have to depend on immediate adoption.
+        That gap has been emotionally difficult. Substantial engineering effort does not produce demand on command. I can believe in the architecture while recognizing that another feature may not resolve the commercial problem.
       </p>
       <p>
-        The next meaningful evidence is external: a team adopting Aquifer Nane, demonstrating useful outcomes, and continuing to use it. Until then, the strategy is to narrow the use case, lower integration costs, and test whether the combined capabilities justify another dependency.
+        Open source gives me flexibility. Keeping Aquifer available does not require an expensive hosted platform. I can pursue employment, contract work, content creation, and other ventures while maintaining it and responding to promising opportunities. My entire livelihood does not have to depend on immediate adoption.
       </p>
       <p>
-        Nane Labs can also develop beyond Aquifer Nane. The runtime could support another product, a specialized agent service, or infrastructure work for customers. Its engineering and research remain assets even if its original commercial direction changes.
+        Nane Labs’ mission is to create a fair, scalable, and equitable internet. Aquifer expresses that through deliberate access to constrained resources. Smaller participants should have a meaningful opportunity to make progress alongside larger ones.
       </p>
       <p>
-        I built Aquifer Nane for a problem I expect to persist. That gives me a reason to keep investigating, not an entitlement to adoption. The long-term opportunity remains open; earning a place in someone else’s architecture is the work ahead.
+        The company can grow beyond this project, and the project can serve purposes beyond its original market. Aquifer could support another business I build or become useful infrastructure for a specialized workload.
+      </p>
+      <p>
+        I have built a foundation, learned from its limits, and kept the opportunity open. The next chapter depends on finding people whose needs make this aqueduct worth using.
       </p>
     </div>
 
@@ -126,7 +131,7 @@ import Layout from '../../layouts/Layout.astro';
         <li id="fn2"><a href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html" target="_blank" rel="noopener" class="inline-link">NGINX request rate limiting</a></li>
         <li id="fn3"><a href="https://hookdeck.com/docs/hookdeck-basics" target="_blank" rel="noopener" class="inline-link">Hookdeck capabilities and use cases</a></li>
         <li id="fn4"><a href="https://docs.temporal.io/task-queue" target="_blank" rel="noopener" class="inline-link">Temporal task queues</a></li>
-        <li id="fn5"><a href="https://github.com/rjpruitt16/aqueduct-benchmarks/blob/main/envoy/RESULTS.md" target="_blank" rel="noopener" class="inline-link">Aquifer Nane’s Envoy benchmark results, including methodology, countercomparisons, and limitations</a></li>
+        <li id="fn5"><a href="https://github.com/rjpruitt16/aqueduct-benchmarks/blob/main/envoy/RESULTS.md" target="_blank" rel="noopener" class="inline-link">Aquifer’s Envoy benchmark results, including methodology, countercomparisons, and limitations</a></li>
         <li id="fn6"><a href="https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/" target="_blank" rel="noopener" class="inline-link">Amazon Builders’ Library: Timeouts, retries, and backoff with jitter</a></li>
         <li id="fn7"><a href="https://blog.cloudflare.com/radar-2025-year-in-review/" target="_blank" rel="noopener" class="inline-link">Cloudflare’s 2025 Year in Review</a></li>
         <li id="fn8"><a href="https://www.hashicorp.com/en/resources/the-future-of-vagrant-toward-3-0" target="_blank" rel="noopener" class="inline-link">HashiCorp: The history and future of Vagrant</a></li>
