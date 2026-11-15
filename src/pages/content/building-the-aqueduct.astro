@@ -1,0 +1,256 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout
+  title="Building the Aqueduct Before the City Arrives — Rahmi Pruitt"
+  description="Aquifer’s API aqueduct vision, the market it must earn, and why I’m building infrastructure before demand is certain."
+>
+  <article class="wrap post">
+    <header class="post-header">
+      <p class="mono-tag">// writing</p>
+      <h1>Building the Aqueduct Before the City Arrives</h1>
+      <p class="post-meta">November 2026 &middot; Rahmi Pruitt &middot; <a href="https://x.com/RahmiPruitt" target="_blank" rel="noopener" class="post-meta-link">@RahmiPruitt</a></p>
+    </header>
+
+    <div class="post-body">
+      <p>
+        I built Aquifer because I believe the internet will need better ways to coordinate demand. More software is acting on our behalf, more operations depend on shared services, and more participants are competing for capacity they do not control.
+      </p>
+      <p>
+        The engineering is already substantial. The market is still taking shape. That is what building the aqueduct before the city arrives means to me: investing in infrastructure for a future I believe in, while doing the work to discover where it belongs.
+      </p>
+      <h2>An API aqueduct</h2>
+      <p>
+        I call the category an <strong>API aqueduct</strong>. Aquifer brings together durable queuing, admission control, per-tenant fairness, idempotency, and backend-directed pacing. It holds accepted work, coordinates when that work moves, and adjusts delivery to the capacity available downstream.
+      </p>
+      <p>
+        The distinction helps explain why Aquifer does not fit neatly into the usual gateway categories. Its organizing purpose is the flow of work over time: who gets access, what waits, and how producers respond when capacity changes. A gateway can remain responsible for routing and other edge functions while Aquifer adds coordination behind it. Existing gateways are therefore potential integration points as well as alternatives.
+      </p>
+      <p>
+        Consider several customers sharing a document-processing service. One submits a huge import while the others continue sending smaller jobs. A queue stores the backlog. The harder questions are whose work moves next, how much the backend can accept, and whether retries create more contention. Aquifer combines those decisions in a reusable runtime.
+      </p>
+      <p>
+        Backend-directed pacing is central to that design. Capacity information returned through response headers lets the backend guide delivery. I want services to communicate pressure and producers to respond, across both inbound requests and outbound dependencies.
+      </p>
+      <p>
+        The fuller brand is <strong>Aquifer Nane</strong>, which I chose to distinguish it from existing uses of Aquifer and avoid naming conflicts. Nane means eight in Swahili. The repository and earlier writing use Aquifer; I use that shorter name here for the same project. Nane Labs, Inc. is the company behind the work.
+      </p>
+      <p>
+        I approached it with the seriousness I would bring to infrastructure that could support a very large company. Aquifer is written in Go and available under Apache 2.0, with substantial documentation, testing, and benchmark work. Endurance experiments have involved tens of millions of requests. This was a deliberate investment in a long-term foundation.
+      </p>
+      <h2>Finding a place among established systems</h2>
+      <p>
+        The market already has capable infrastructure. Aquifer must earn its place within it.
+      </p>
+      <div class="post-table-wrap">
+        <table class="post-table">
+          <thead><tr><th>Existing approach</th><th>Why it may already be sufficient</th></tr></thead>
+          <tbody>
+            <tr><td>Envoy and NGINX</td><td>Established traffic controls protect services. Envoy supports circuit-breaking limits and retry budgets; NGINX can delay or reject excess requests through keyed rate limiting.</td></tr>
+            <tr><td>Hookdeck</td><td>Managed event infrastructure supplies durable queuing, controlled delivery, retries, and visibility, including agent-related workflows.</td></tr>
+            <tr><td>Temporal and workflow engines</td><td>Durable execution, task queues, and dispatch controls already coordinate substantial amounts of work.</td></tr>
+            <tr><td>Redis-backed queues and custom dispatchers</td><td>Teams can implement application-specific fairness, idempotency, and pacing while retaining architectural control.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        These approaches occupy different layers, but each can address enough of the problem to make another dependency unnecessary.<sup><a href="#fn1">[1–4]</a></sup>
+      </p>
+      <p>
+        My benchmarks show both the opportunity and the strength of those alternatives. In the Envoy chained-workload experiment, clients retried until completion while load reached three times capacity and capacity later doubled. Across three runs per configuration, Envoy required approximately 3.5 requests per completed job versus 1.0 with Aquifer. Equally sized polite tenants had chain-completion p99 times of 1.9–2.8 minutes with Envoy, compared with about nine seconds across retry styles with Aquifer.<sup><a href="#fn5">[5]</a></sup>
+      </p>
+      <p>
+        Rejection protected the backend, but client backoff extended waiting and rewarded aggressive retries. Coordinating admission changed that experience. In other regimes, Envoy served typical requests faster while Aquifer held more work for eventual completion.
+      </p>
+      <p>
+        Adding coordination to Envoy also worked. In the stacked-retry experiment, Envoy plus Redis idempotency and a fair dispatcher completed approximately 47,200–47,500 requests, compared with Aquifer’s 46,200–46,300, with similar small-tenant tail latency.<sup><a href="#fn5">[5]</a></sup> These synthetic tests establish behavior under their stated conditions; independent production validation remains the next step.
+      </p>
+      <p>
+        The value proposition includes making these capabilities available together, reducing the engineering and maintenance required to assemble them. Calling it an API aqueduct gives that role a clearer identity. Customers still need a reason to adopt it.
+      </p>
+      <p>
+        Customer discovery has generated considerable interest, but little urgent need. People can appreciate the architecture and recognize the problem while remaining satisfied with their existing systems. Attention and technical engagement have not yet become production commitments.
+      </p>
+      <p>
+        There are other barriers. My Amazon and Twitch experience gives me relevant foundations, but I am still building authority in this category. Benchmarks do not replace references from operators. Coding agents make custom infrastructure easier to build, including for the teams I hope to serve. Aquifer must offer enough ongoing value to justify integration and ownership.
+      </p>
+      <h2>The opportunity ahead</h2>
+      <p>
+        The underlying problem is established. Amazon’s Builders’ Library explains how retries at successive layers multiply load and how circuit-breaker behavior can delay recovery.<sup><a href="#fn6">[6]</a></sup> Fairness adds another question: whether access to capacity reflects an intentional policy or simply which clients retry hardest.
+      </p>
+      <p>
+        Software-generated demand is also expanding. Cloudflare’s 2025 review reported more than fifteenfold growth in AI “user action” crawling, a category associated with users asking AI systems to retrieve information.<sup><a href="#fn7">[7]</a></sup> That is one visible signal of machines doing more work on people’s behalf.
+      </p>
+      <p>
+        I expect autonomous agents and agent-to-agent communication to introduce more shared constraints: API quotas, browser pools, inference endpoints, and long-running processing services. Bidirectional pacing becomes interesting when participants can communicate available capacity and adjust demand across organizational boundaries.
+      </p>
+      <p>
+        Building the aqueduct before the city arrives does not mean assuming a city will appear wherever I choose. It means building useful capacity while learning where activity is gathering. The opportunity may emerge through a specialized agent workload, a congested integration, or a gateway that benefits from an additional coordination layer.
+      </p>
+      <p>
+        I do not see this as a single opening that expires in 2027. New workloads create new entry points. Established providers will adapt too; my task is to find the situations where Aquifer’s combination of capabilities is worth adopting.
+      </p>
+      <p>
+        The ambition can still be substantial. Envoy and NGINX show how important a widely adopted traffic layer can become. Vagrant offers another company-building example: it preceded HashiCorp, and its commercial VMware plugin helped fund subsequent tools.<sup><a href="#fn8">[8]</a></sup> Infrastructure can support ecosystems and businesses beyond its original use.
+      </p>
+      <p>
+        For Nane Labs, the proposed business model keeps the core open source, with implementation consulting, enterprise support, and optional private managed hosting. The first commercial proof would be a team obtaining sustained operational value and choosing to pay for help deploying or maintaining it.
+      </p>
+      <p>
+        Distribution matters just as much. Benchmarks, integrations, practitioner relationships, and content creation can help people understand the work. As I build an audience, familiarity with my engineering and values may become a source of trust.
+      </p>
+      <p>
+        I also see an opportunity beyond developers. Agents could make open-source software easier for non-programmers to deploy and operate. That would expand who can use infrastructure and make clear explanations, trustworthy maintainers, and practical outcomes increasingly important.
+      </p>
+      <h2>A foundation with room to grow</h2>
+      <p>
+        I remain optimistic without treating commercial success as settled. Aquifer has no confirmed production customers or external investment. Interest must become adoption, and adoption must deliver enough value to sustain a business.
+      </p>
+      <p>
+        That gap has been emotionally difficult. Substantial engineering effort does not produce demand on command. I can believe in the architecture while recognizing that another feature may not resolve the commercial problem.
+      </p>
+      <p>
+        Open source gives me flexibility. Keeping Aquifer available does not require an expensive hosted platform. I can pursue employment, contract work, content creation, and other ventures while maintaining it and responding to promising opportunities. My entire livelihood does not have to depend on immediate adoption.
+      </p>
+      <p>
+        Nane Labs’ mission is to create a fair, scalable, and equitable internet. Aquifer expresses that through deliberate access to constrained resources. Smaller participants should have a meaningful opportunity to make progress alongside larger ones.
+      </p>
+      <p>
+        The company can grow beyond this project, and the project can serve purposes beyond its original market. Aquifer could support another business I build or become useful infrastructure for a specialized workload.
+      </p>
+      <p>
+        I have built a foundation, learned from its limits, and kept the opportunity open. The next chapter depends on finding people whose needs make this aqueduct worth using.
+      </p>
+    </div>
+
+    <footer class="post-footnotes">
+      <hr class="rule" />
+      <p class="mono-tag">// sources</p>
+      <ol>
+        <li id="fn1"><a href="https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/circuit_breaking.html" target="_blank" rel="noopener" class="inline-link">Envoy circuit breaking and retry budgets</a></li>
+        <li id="fn2"><a href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html" target="_blank" rel="noopener" class="inline-link">NGINX request rate limiting</a></li>
+        <li id="fn3"><a href="https://hookdeck.com/docs/hookdeck-basics" target="_blank" rel="noopener" class="inline-link">Hookdeck capabilities and use cases</a></li>
+        <li id="fn4"><a href="https://docs.temporal.io/task-queue" target="_blank" rel="noopener" class="inline-link">Temporal task queues</a></li>
+        <li id="fn5"><a href="https://github.com/rjpruitt16/aqueduct-benchmarks/blob/main/envoy/RESULTS.md" target="_blank" rel="noopener" class="inline-link">Aquifer’s Envoy benchmark results, including methodology, countercomparisons, and limitations</a></li>
+        <li id="fn6"><a href="https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/" target="_blank" rel="noopener" class="inline-link">Amazon Builders’ Library: Timeouts, retries, and backoff with jitter</a></li>
+        <li id="fn7"><a href="https://blog.cloudflare.com/radar-2025-year-in-review/" target="_blank" rel="noopener" class="inline-link">Cloudflare’s 2025 Year in Review</a></li>
+        <li id="fn8"><a href="https://www.hashicorp.com/en/resources/the-future-of-vagrant-toward-3-0" target="_blank" rel="noopener" class="inline-link">HashiCorp: The history and future of Vagrant</a></li>
+      </ol>
+      <a href="/content/" class="btn-ghost post-back">&larr; Back to Writing &amp; Talks</a>
+    </footer>
+  </article>
+</Layout>
+
+<style>
+  .post { max-width: 800px; padding-top: 64px; padding-bottom: 100px; }
+  .post-header { margin-bottom: 40px; }
+  .post-header h1 {
+    font-size: clamp(2rem, 4.2vw, 2.8rem);
+    margin: 14px 0 16px;
+  }
+  .post-dek {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--paper-dim);
+    margin: 0 0 14px;
+  }
+  .post-meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    color: var(--paper-faint);
+    margin: 0;
+  }
+  .post-meta-link {
+    color: var(--signal-bright);
+    border-bottom: 1px solid var(--signal);
+  }
+
+  .post-image {
+    display: block;
+    width: 100%;
+    max-width: 68ch;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: #fff;
+    margin: 0 0 34px;
+  }
+  .post-image-lead { max-width: 100%; margin-bottom: 44px; }
+
+  .inline-link { color: var(--signal-bright); border-bottom: 1px solid var(--signal); }
+
+  .post-body p {
+    font-size: 1.05rem;
+    max-width: 68ch;
+    margin: 0 0 1.3em;
+  }
+  .post-body sup a {
+    color: var(--signal-bright);
+    font-size: 0.75em;
+  }
+
+  .post-loop {
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    color: var(--signal-bright);
+    background: var(--ink-raised);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 18px 22px;
+    max-width: 68ch;
+  }
+
+  .post-divider { max-width: 68ch; margin: 40px 0; }
+
+  .post-pullquote {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    line-height: 1.35;
+    color: var(--paper);
+    max-width: 60ch;
+    margin: 36px 0;
+    padding-left: 20px;
+    border-left: 3px solid var(--signal);
+  }
+  .post-closer {
+    margin-top: 48px;
+    font-size: 1.6rem;
+  }
+
+  .post-footnotes { margin-top: 56px; }
+  .post-footnotes ol {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--paper-faint);
+    line-height: 1.8;
+    padding-left: 20px;
+    margin: 24px 0 36px;
+  }
+  .post-footnotes .inline-link {
+    color: var(--signal-bright);
+    border-bottom: 1px solid var(--signal);
+    word-break: break-all;
+  }
+  .post-back { display: inline-block; }
+
+  @media (max-width: 720px) {
+    .post-pullquote { font-size: 1.2rem; padding-left: 14px; }
+    .post-closer { font-size: 1.35rem; }
+  }
+
+  .post-body h2 { margin: 48px 0 16px; }
+  .post-table-wrap { overflow-x: auto; margin: 28px 0; max-width: 100%; }
+  .post-table { border-collapse: collapse; font-size: 0.95rem; line-height: 1.55; width: 100%; }
+  .post-table th, .post-table td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--rule); }
+  .post-table th { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--paper-faint); }
+  .post-table td:first-child { width: 34%; color: var(--paper); }
+  @media (max-width: 720px) {
+    .post-table, .post-table tbody, .post-table tr, .post-table td { display: block; width: 100%; }
+    .post-table thead { display: none; }
+    .post-table tr { border-bottom: 1px solid var(--rule); padding: 12px 0; }
+    .post-table td { border: 0; padding: 4px 0; }
+    .post-table td:first-child { width: 100%; font-weight: 600; }
+  }
+  .post-footnotes li { margin-bottom: 6px; }
+</style>
